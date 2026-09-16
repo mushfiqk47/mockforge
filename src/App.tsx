@@ -243,38 +243,64 @@ function NoneFrameIcon() {
 
 function BrowserNavIcons() {
   return (
-    <div className="browser-nav-group" aria-hidden="true">
-      <svg
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        className="nav-btn"
+    <div className="browser-nav-group" aria-label="Navigation controls">
+      <button
+        type="button"
+        className="browser-nav-btn"
+        title="Back"
+        aria-label="Back"
       >
-        <path d="M10 12L6 8l4-4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <svg
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        className="nav-btn"
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+        >
+          <path
+            d="M10 12L6 8l4-4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        type="button"
+        className="browser-nav-btn"
+        title="Forward"
+        aria-label="Forward"
       >
-        <path d="M6 12l4-4-4-4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <svg
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        className="nav-btn reload-btn"
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+        >
+          <path
+            d="M6 12l4-4-4-4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        type="button"
+        className="browser-nav-btn reload-btn"
+        title="Reload page"
+        aria-label="Reload page"
       >
-        <path
-          d="M13 8A5 5 0 1 1 8 3c1.8 0 3.4.9 4.3 2.3M13 2.5V5.5H10"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+        >
+          <path
+            d="M13 8A5 5 0 1 1 8 3c1.8 0 3.4.9 4.3 2.3M13 2.5V5.5H10"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
     </div>
   )
 }
@@ -574,18 +600,21 @@ export function MockupCanvas({
         return (
           <div className={`frame-shell frame-browser finish-${frameFinish}`}>
             <div className="browser-titlebar">
-              <div className="browser-dots">
-                <span className="dot dot-red">
-                  <i>×</i>
-                </span>
-                <span className="dot dot-yellow">
-                  <i>−</i>
-                </span>
-                <span className="dot dot-green">
-                  <i>+</i>
-                </span>
+              <div className="browser-titlebar-left">
+                <div className="browser-dots" aria-hidden="true">
+                  <span className="dot dot-red">
+                    <i>×</i>
+                  </span>
+                  <span className="dot dot-yellow">
+                    <i>−</i>
+                  </span>
+                  <span className="dot dot-green">
+                    <i>+</i>
+                  </span>
+                </div>
+                <BrowserNavIcons />
               </div>
-              <BrowserNavIcons />
+
               <div className="browser-address-pill">
                 <LockIcon className="browser-lock-icon" />
                 <span className="browser-url-text">
@@ -593,20 +622,48 @@ export function MockupCanvas({
                 </span>
                 <span className="browser-pill-badge">PRO</span>
               </div>
-              <div className="browser-actions">
-                <svg
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  className="browser-action-icon"
-                >
-                  <path
-                    d="M8 2.5v7M5.5 5L8 2.5 10.5 5M3.5 9.5v3a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+
+              <div className="browser-titlebar-right">
+                <div className="browser-actions">
+                  <button
+                    type="button"
+                    className="browser-action-btn"
+                    title="Share"
+                    aria-label="Share"
+                  >
+                    <svg
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    >
+                      <path
+                        d="M8 2.5v7M5.5 5L8 2.5 10.5 5M3.5 9.5v3a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className="browser-action-btn"
+                    title="New tab"
+                    aria-label="New tab"
+                  >
+                    <svg
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    >
+                      <path
+                        d="M8 3.5v9M3.5 8h9"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
             <div className="frame-viewport-screen">
