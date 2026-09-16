@@ -194,6 +194,12 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   line-height: 1;
 }
 
+.brand-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .theme-icon-button {
   width: 28px;
   height: 28px;
@@ -2068,7 +2074,15 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   margin-bottom: 12px;
+}
+
+.suggest-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .suggest-author-link {
@@ -2084,6 +2098,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   font-size: 11px;
   font-weight: 500;
   transition: all 140ms ease;
+  line-height: 1;
 }
 
 .suggest-author-link:hover {
@@ -2092,12 +2107,14 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   color: #ffffff;
 }
 
-.suggest-x-icon {
+.suggest-x-icon,
+.suggest-github-icon {
   width: 12px;
   height: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .suggest-close-btn {
