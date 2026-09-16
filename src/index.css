@@ -1063,6 +1063,13 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   color: var(--titlebar-text, #ffffff);
 }
 
+.browser-nav-btn.nav-btn-disabled,
+.browser-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
 .finish-silver .browser-nav-btn:hover,
 .finish-silver .browser-action-btn:hover {
   background: rgba(0, 0, 0, 0.07);

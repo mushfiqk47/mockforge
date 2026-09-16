@@ -254,32 +254,29 @@ function BrowserNavIcons() {
           viewBox="0 0 16 16"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <path
-            d="M10 12L6 8l4-4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <path d="M10 3.5L5.5 8L10 12.5" />
         </svg>
       </button>
       <button
         type="button"
-        className="browser-nav-btn"
-        title="Forward"
+        className="browser-nav-btn nav-btn-disabled"
+        title="Forward (disabled)"
         aria-label="Forward"
+        disabled
       >
         <svg
           viewBox="0 0 16 16"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <path
-            d="M6 12l4-4-4-4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <path d="M6 3.5L10.5 8L6 12.5" />
         </svg>
       </button>
       <button
@@ -292,13 +289,12 @@ function BrowserNavIcons() {
           viewBox="0 0 16 16"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <path
-            d="M13 8A5 5 0 1 1 8 3c1.8 0 3.4.9 4.3 2.3M13 2.5V5.5H10"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <path d="M13.2 7.8A5.2 5.2 0 1 1 11.6 4.1" />
+          <polyline points="13.5 2.5 13.5 5.5 10.5 5.5" />
         </svg>
       </button>
     </div>
