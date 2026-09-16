@@ -1176,14 +1176,14 @@ export default function App() {
             </div>
             <div className="brand-header-actions">
               <a
-                href="https://github.com/mushfiqk47/mockforge"
+                href="https://x.com/mushfiqk47"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="theme-icon-button brand-github-btn"
-                title="View MockForge on GitHub"
-                aria-label="View MockForge on GitHub"
+                className="theme-icon-button brand-x-btn"
+                title="Follow @mushfiqk47 on X"
+                aria-label="Follow @mushfiqk47 on X"
               >
-                <GitHubIcon className="theme-toggle-icon" />
+                <XBrandIcon className="theme-toggle-icon" />
               </a>
               <button
                 type="button"

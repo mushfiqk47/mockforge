@@ -210,6 +210,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   border-radius: var(--radius-xs);
   background: var(--color-surface-card);
   color: var(--color-text-secondary);
+  text-decoration: none;
   transition: border-color 150ms, color 150ms, background-color 150ms;
   padding: 0;
   flex-shrink: 0;
