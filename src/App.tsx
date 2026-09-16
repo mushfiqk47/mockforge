@@ -1,12 +1,5 @@
-import {
-  ChangeEvent,
-  DragEvent,
-  PointerEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-import { toPng } from "html-to-image"
+import { memo, useEffect, useRef, useState } from "react"
+import type { ChangeEvent, DragEvent, PointerEvent } from "react"
 import studioMonitorFrame from "./Frame/studio_monitor_frame.jpg"
 import mobileTallFrame from "./Frame/mobile_tall_frame.jpg"
 import laptopProFrame from "./Frame/laptop_pro_frame.jpg"
@@ -243,13 +236,8 @@ function NoneFrameIcon() {
 
 function BrowserNavIcons() {
   return (
-    <div className="browser-nav-group" aria-label="Navigation controls">
-      <button
-        type="button"
-        className="browser-nav-btn"
-        title="Back"
-        aria-label="Back"
-      >
+    <div className="browser-nav-group" aria-hidden="true">
+      <span className="browser-nav-btn">
         <svg
           viewBox="0 0 16 16"
           fill="none"
@@ -260,14 +248,8 @@ function BrowserNavIcons() {
         >
           <path d="M10 3.5L5.5 8L10 12.5" />
         </svg>
-      </button>
-      <button
-        type="button"
-        className="browser-nav-btn nav-btn-disabled"
-        title="Forward (disabled)"
-        aria-label="Forward"
-        disabled
-      >
+      </span>
+      <span className="browser-nav-btn nav-btn-disabled">
         <svg
           viewBox="0 0 16 16"
           fill="none"
@@ -278,13 +260,8 @@ function BrowserNavIcons() {
         >
           <path d="M6 3.5L10.5 8L6 12.5" />
         </svg>
-      </button>
-      <button
-        type="button"
-        className="browser-nav-btn reload-btn"
-        title="Reload page"
-        aria-label="Reload page"
-      >
+      </span>
+      <span className="browser-nav-btn reload-btn">
         <svg
           viewBox="0 0 16 16"
           fill="none"
@@ -296,7 +273,7 @@ function BrowserNavIcons() {
           <path d="M13.2 7.8A5.2 5.2 0 1 1 11.6 4.1" />
           <polyline points="13.5 2.5 13.5 5.5 10.5 5.5" />
         </svg>
-      </button>
+      </span>
     </div>
   )
 }
@@ -490,22 +467,16 @@ export function MockupCanvas({
             }
           }}
           title="Click to upload an image"
+          aria-label="Upload an image. Activate to choose a file."
         >
           <div className="empty-icon-wrap" aria-hidden="true">
             <UploadIcon />
           </div>
           <strong className="empty-title">Your image is the mockup.</strong>
           <span className="empty-subtitle">Upload one image to begin.</span>
-          <button
-            type="button"
-            className="empty-upload-btn"
-            onClick={(e) => {
-              e.stopPropagation()
-              onUploadClick?.()
-            }}
-          >
+          <span className="empty-upload-btn" aria-hidden="true">
             Upload image
-          </button>
+          </span>
         </div>
       )
     }
@@ -530,6 +501,8 @@ export function MockupCanvas({
                 onPointerDown={() => onActiveSectionChange(index)}
               >
                 <img
+                  loading="lazy"
+                  decoding="async"
                   src={image}
                   alt={`Uploaded website image, section ${index + 1}`}
                   {...cropImageProps(
@@ -546,7 +519,9 @@ export function MockupCanvas({
             className={`atlas-divider ${draggingDivider ? "is-active" : ""}`}
             style={{ left: `${sections[0].x + sections[0].width}%` }}
             role="separator"
+            tabIndex={0}
             aria-orientation="vertical"
+            aria-label="Split divider. Use left and right arrow keys to resize sections."
             aria-valuenow={Math.round(sections[0].width)}
             aria-valuemin={25}
             aria-valuemax={90}
@@ -556,6 +531,17 @@ export function MockupCanvas({
               event.currentTarget.setPointerCapture(event.pointerId)
               onActiveSectionChange(0)
               setDraggingDivider(true)
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== "ArrowLeft" && event.key !== "ArrowRight")
+                return
+              event.preventDefault()
+              const delta = event.key === "ArrowLeft" ? -2 : 2
+              const nextWidth = Math.max(
+                25,
+                Math.min(88, sections[0].width + delta),
+              )
+              onSectionChange(0, { ...sections[0], width: nextWidth })
             }}
           >
             <span className="divider-handle">
@@ -578,6 +564,8 @@ export function MockupCanvas({
           style={{ borderRadius: `${sectionRadius}px` }}
         >
           <img
+            loading="lazy"
+            decoding="async"
             src={primaryImage}
             alt="Primary uploaded website image"
             {...cropImageProps(0, primaryFocus, onPrimaryFocusChange)}
@@ -624,12 +612,7 @@ export function MockupCanvas({
 
               <div className="browser-titlebar-right">
                 <div className="browser-actions">
-                  <button
-                    type="button"
-                    className="browser-action-btn"
-                    title="Share"
-                    aria-label="Share"
-                  >
+                  <span className="browser-action-btn" aria-hidden="true">
                     <svg
                       viewBox="0 0 16 16"
                       fill="none"
@@ -642,13 +625,8 @@ export function MockupCanvas({
                         strokeLinejoin="round"
                       />
                     </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="browser-action-btn"
-                    title="New tab"
-                    aria-label="New tab"
-                  >
+                  </span>
+                  <span className="browser-action-btn" aria-hidden="true">
                     <svg
                       viewBox="0 0 16 16"
                       fill="none"
@@ -661,7 +639,7 @@ export function MockupCanvas({
                         strokeLinejoin="round"
                       />
                     </svg>
-                  </button>
+                  </span>
                 </div>
               </div>
             </div>
@@ -834,6 +812,7 @@ export function MockupCanvas({
     <div
       id="mockup-canvas"
       ref={canvasRef}
+      tabIndex={-1}
       className={`mockup-canvas frame-mode-${frameType} finish-${frameFinish} ratio-${frameRatio} shadow-${frameShadow} ${
         !primaryImage ? "is-empty" : ""
       }`}
@@ -922,10 +901,13 @@ function ExternalLinkIcon({ className = "w-3 h-3" }: { className?: string }) {
   )
 }
 
-function FloatingSuggestionBox() {
+const FloatingSuggestionBox = memo(function FloatingSuggestionBox() {
   const [isOpen, setIsOpen] = useState(false)
   const [suggestion, setSuggestion] = useState("")
   const boxRef = useRef<HTMLDivElement>(null)
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
+  const fabRef = useRef<HTMLButtonElement>(null)
+  const wasOpenRef = useRef(false)
   const xProfileUrl = "https://x.com/mushfiqk47"
   const githubRepoUrl = "https://github.com/mushfiqk47/mockforge"
 
@@ -949,6 +931,12 @@ function FloatingSuggestionBox() {
     }
   }, [isOpen])
 
+  useEffect(() => {
+    if (isOpen && !wasOpenRef.current) closeBtnRef.current?.focus()
+    if (!isOpen && wasOpenRef.current) fabRef.current?.focus()
+    wasOpenRef.current = isOpen
+  }, [isOpen])
+
   const handlePostOnX = () => {
     const text = suggestion.trim()
       ? `Hey @mushfiqk47, suggestion for MockForge: ${suggestion.trim()}`
@@ -966,9 +954,10 @@ function FloatingSuggestionBox() {
       {isOpen && (
         <div
           className="floating-suggest-box"
+          id="mockforge-suggest-dialog"
           role="dialog"
           aria-modal="true"
-          aria-label="Suggest Improvements"
+          aria-labelledby="suggest-title"
         >
           <div className="suggest-box-header">
             <div className="suggest-header-badges">
@@ -998,6 +987,7 @@ function FloatingSuggestionBox() {
               </a>
             </div>
             <button
+              ref={closeBtnRef}
               type="button"
               className="suggest-close-btn"
               onClick={() => setIsOpen(false)}
@@ -1008,14 +998,24 @@ function FloatingSuggestionBox() {
           </div>
 
           <div className="suggest-box-body">
-            <h3 className="suggest-title">Suggest Improvements</h3>
+            <h3 className="suggest-title" id="suggest-title">
+              Suggest Improvements
+            </h3>
             <p className="suggest-subtitle">
               Have an idea, new frame request, or feedback? Share it directly on
               X with @mushfiqk47!
             </p>
 
+            <label
+              className="sr-only"
+              htmlFor="suggest-textarea"
+              id="suggest-textarea-label"
+            >
+              Describe your suggestion for MockForge
+            </label>
             <textarea
-              className="suggest-textarea"
+              id="suggest-textarea"
+              aria-labelledby="suggest-title suggest-textarea-label"
               value={suggestion}
               onChange={(e) => setSuggestion(e.target.value)}
               placeholder="What would make MockForge better for your workflow?"
@@ -1066,10 +1066,13 @@ function FloatingSuggestionBox() {
       )}
 
       <button
+        ref={fabRef}
         type="button"
         className={`floating-suggest-pill ${isOpen ? "is-open" : ""}`}
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
+        aria-controls="mockforge-suggest-dialog"
+        aria-label={isOpen ? "Close suggestion box" : "Suggest improvements"}
         title="Suggest improvements or contact @mushfiqk47 on X"
       >
         <ChatBubbleIcon className="suggest-bubble-icon" />
@@ -1077,7 +1080,7 @@ function FloatingSuggestionBox() {
       </button>
     </div>
   )
-}
+})
 
 export default function App() {
   const [images, setImages] = useState<string[]>([])
@@ -1191,6 +1194,7 @@ export default function App() {
     const node = document.getElementById("mockup-canvas")
     if (!node) return
     setExporting(true)
+    const { toPng } = await import("html-to-image")
     node.classList.add("is-exporting")
     const canvasImages = Array.from(node.querySelectorAll("img"))
     const originalSources = canvasImages.map((image) => image.src)
@@ -1236,14 +1240,31 @@ export default function App() {
     }
   }
 
+  const skipToPreview = () => {
+    document
+      .getElementById("mockup-canvas")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" })
+    document.getElementById("mockup-canvas")?.focus()
+  }
+
   return (
     <main className={`app-shell ${darkTheme ? "theme-dark" : ""}`}>
-      <aside className="control-panel">
+      <a
+        href="#mockup-canvas"
+        className="skip-link"
+        onClick={(event) => {
+          event.preventDefault()
+          skipToPreview()
+        }}
+      >
+        Skip to preview
+      </a>
+      <aside className="control-panel" aria-label="Mockup controls">
         <div className="control-panel-scroll">
           <header className="brand-header">
             <div className="brand-identity">
               <BrandLogo />
-              <span className="brand-name">MockForge</span>
+              <h1 className="brand-name">MockForge</h1>
             </div>
             <div className="brand-header-actions">
               <a
@@ -1273,13 +1294,14 @@ export default function App() {
           </header>
 
           {/* Imagery Section */}
-          <section className="tool-section">
+          <section className="tool-section" aria-label="Imagery">
             <div className="section-head">
               <span>Imagery</span>
               <span>{images.length}/1</span>
             </div>
             {images.length === 0 && (
               <button
+                type="button"
                 className={`dropzone ${dragging ? "is-dragging" : ""}`}
                 onClick={() => inputRef.current?.click()}
                 onDrop={drop}
@@ -1294,8 +1316,12 @@ export default function App() {
                 <small>JPG, PNG or WEBP · 10MB max</small>
               </button>
             )}
+            <label className="sr-only" htmlFor="mockforge-upload">
+              Upload a website screenshot (JPG, PNG or WEBP, 10MB max)
+            </label>
             <input
               ref={inputRef}
+              id="mockforge-upload"
               type="file"
               accept="image/*"
               className="sr-only"
@@ -1305,14 +1331,21 @@ export default function App() {
               <div className="image-chips">
                 {images.map((image, index) => (
                   <div className="image-chip" key={image}>
-                    <img src={image} alt="Selected upload" />
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={image}
+                      alt="Selected upload"
+                    />
                     <span>IMAGE 0{index + 1}</span>
                     <button
+                      type="button"
+                      aria-label={`Remove image ${index + 1}`}
                       onClick={() =>
                         setImages((old) => old.filter((_, i) => i !== index))
                       }
                     >
-                      ×
+                      <span aria-hidden="true">×</span>
                     </button>
                   </div>
                 ))}
@@ -1321,13 +1354,15 @@ export default function App() {
           </section>
 
           {/* Format Section */}
-          <section className="tool-section">
+          <section className="tool-section" aria-label="Format">
             <div className="section-head">
               <span>Format</span>
               <span>LIVE</span>
             </div>
             <div className="mode-toggle">
               <button
+                type="button"
+                aria-pressed={mode === "single"}
                 className={mode === "single" ? "active" : ""}
                 onClick={() => setMode("single")}
               >
@@ -1335,6 +1370,8 @@ export default function App() {
                 Single hero
               </button>
               <button
+                type="button"
+                aria-pressed={mode === "split"}
                 className={mode === "split" ? "active" : ""}
                 onClick={() => setMode("split")}
               >
@@ -1345,7 +1382,10 @@ export default function App() {
           </section>
 
           {/* Preview Frame Section */}
-          <section className="tool-section preview-frame-section">
+          <section
+            className="tool-section preview-frame-section"
+            aria-label="Preview frame"
+          >
             <div className="section-head">
               <span>Preview frame</span>
               <span>{frameType.toUpperCase()}</span>
@@ -1361,6 +1401,7 @@ export default function App() {
                     frameType === id ? "is-active" : ""
                   }`}
                   onClick={() => setFrameType(id)}
+                  aria-pressed={frameType === id}
                   title={desc}
                 >
                   <div className="frame-card-icon">
@@ -1386,6 +1427,7 @@ export default function App() {
                       frameFinish === id ? "is-active" : ""
                     }`}
                     onClick={() => setFrameFinish(id)}
+                    aria-pressed={frameFinish === id}
                     title={label}
                   >
                     <span
@@ -1401,6 +1443,7 @@ export default function App() {
                     frameGlare ? "is-active" : ""
                   }`}
                   onClick={() => setFrameGlare((v) => !v)}
+                  aria-pressed={frameGlare}
                   title="Toggle 3D Screen Glass Sheen Reflection"
                 >
                   <span className="glare-star">✦</span>
@@ -1428,6 +1471,7 @@ export default function App() {
                       frameRatio === id ? "is-active" : ""
                     }`}
                     onClick={() => setFrameRatio(id)}
+                    aria-pressed={frameRatio === id}
                     title={`${label} · ${desc}`}
                   >
                     {label}
@@ -1465,6 +1509,7 @@ export default function App() {
                   style={{
                     background: `linear-gradient(to right, var(--color-slider-fill) 0%, var(--color-slider-fill) ${(sectionRadius / 48) * 100}%, var(--color-slider-track) ${(sectionRadius / 48) * 100}%, var(--color-slider-track) 100%)`,
                   }}
+                  aria-valuetext={`${sectionRadius} pixels`}
                   onChange={(event) =>
                     setSectionRadius(Number(event.target.value))
                   }
@@ -1479,6 +1524,7 @@ export default function App() {
                         sectionRadius === r ? "is-active" : ""
                       }`}
                       onClick={() => setSectionRadius(r)}
+                      aria-pressed={sectionRadius === r}
                     >
                       {r === 0 ? "Square" : `${r}px`}
                     </button>
@@ -1501,6 +1547,7 @@ export default function App() {
                       frameShadow === shadow ? "is-active" : ""
                     }`}
                     onClick={() => setFrameShadow(shadow)}
+                    aria-pressed={frameShadow === shadow}
                   >
                     {shadow.charAt(0).toUpperCase() + shadow.slice(1)}
                   </button>
@@ -1510,14 +1557,17 @@ export default function App() {
           </section>
 
           {/* Canvas Background Section */}
-          <section className="tool-section background-picker">
+          <section
+            className="tool-section background-picker"
+            aria-label="Canvas background"
+          >
             <div className="section-head">
               <span>Canvas background</span>
               <span>LIVE</span>
             </div>
             <div className="background-controls">
               <label className="color-control">
-                <span>Color</span>
+                <span>Custom color</span>
                 <input
                   type="color"
                   value={
@@ -1528,7 +1578,11 @@ export default function App() {
                   onChange={(event) => setCanvasBackground(event.target.value)}
                 />
               </label>
-              <div className="gradient-options">
+              <div
+                className="gradient-options"
+                role="group"
+                aria-label="Canvas background presets"
+              >
                 {[
                   ["solid", "Black background", "#111111"],
                   [
@@ -1604,7 +1658,9 @@ export default function App() {
                 ].map(([name, label, value]) => (
                   <button
                     key={name}
-                    aria-label={label}
+                    type="button"
+                    aria-label={`Canvas background: ${label}`}
+                    aria-pressed={canvasBackground === value}
                     className={`background-swatch ${name}`}
                     onClick={() => setCanvasBackground(value)}
                     style={
@@ -1614,13 +1670,18 @@ export default function App() {
                 ))}
               </div>
               <button
+                type="button"
                 className="background-upload"
                 onClick={() => backgroundInputRef.current?.click()}
               >
                 Upload background
               </button>
+              <label className="sr-only" htmlFor="mockforge-background-upload">
+                Upload a custom canvas background image
+              </label>
               <input
                 ref={backgroundInputRef}
+                id="mockforge-background-upload"
                 type="file"
                 accept="image/*"
                 className="sr-only"
@@ -1631,19 +1692,26 @@ export default function App() {
 
           {/* Split Inspector Section */}
           {mode === "split" && images[0] && (
-            <section className="tool-section split-inspector">
+            <section
+              className="tool-section split-inspector"
+              aria-label="Split section inspector"
+            >
               <div className="section-head">
                 <span>Split section</span>
                 <span>S{activeSection + 1}</span>
               </div>
               <div className="section-tabs">
                 <button
+                  type="button"
+                  aria-pressed={activeSection === 0}
                   className={activeSection === 0 ? "active" : ""}
                   onClick={() => setActiveSection(0)}
                 >
                   Section 1
                 </button>
                 <button
+                  type="button"
+                  aria-pressed={activeSection === 1}
                   className={activeSection === 1 ? "active" : ""}
                   onClick={() => setActiveSection(1)}
                 >
@@ -1684,6 +1752,7 @@ export default function App() {
                         style={{
                           background: `linear-gradient(to right, var(--color-slider-fill) 0%, var(--color-slider-fill) ${progress}%, var(--color-slider-track) ${progress}%, var(--color-slider-track) 100%)`,
                         }}
+                        aria-valuetext={`${Math.round(selectedLayout[property])} percent`}
                         onChange={(event) =>
                           updateSelectedLayout(
                             property,
@@ -1707,6 +1776,7 @@ export default function App() {
                   style={{
                     background: `linear-gradient(to right, var(--color-slider-fill) 0%, var(--color-slider-fill) ${(sectionRadius / 48) * 100}%, var(--color-slider-track) ${(sectionRadius / 48) * 100}%, var(--color-slider-track) 100%)`,
                   }}
+                  aria-valuetext={`${sectionRadius} pixels`}
                   onChange={(event) =>
                     setSectionRadius(Number(event.target.value))
                   }
@@ -1719,17 +1789,31 @@ export default function App() {
         {/* Docked Export Footer */}
         <footer className="control-panel-footer">
           <button
+            type="button"
             className="export-button"
             onClick={exportCanvas}
-            disabled={exporting}
+            disabled={exporting || !images[0]}
+            aria-disabled={exporting || !images[0]}
+            title={
+              images[0]
+                ? "Export the preview as PNG"
+                : "Upload an image to enable export"
+            }
           >
             {exporting ? "Rendering..." : "Export PNG"} <ArrowUpRight />
           </button>
+          <p className="sr-only" role="status" aria-live="polite">
+            {exporting
+              ? "Rendering PNG export."
+              : images[0]
+                ? "Preview ready. Export is available."
+                : "Upload one image to begin. Export is disabled."}
+          </p>
         </footer>
       </aside>
 
       {/* Stage Frame Area */}
-      <section className="stage stage-ember">
+      <section className="stage stage-ember" aria-label="Mockup preview">
         <div className="stage-frame">
           <MockupCanvas
             mode={mode}
