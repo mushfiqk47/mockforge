@@ -1,0 +1,1614 @@
+import {
+  ChangeEvent,
+  DragEvent,
+  PointerEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
+import { toPng } from "html-to-image"
+import studioMonitorFrame from "./Frame/studio_monitor_frame.jpg"
+import mobileTallFrame from "./Frame/mobile_tall_frame.jpg"
+import laptopProFrame from "./Frame/laptop_pro_frame.jpg"
+
+type Mode = "single" | "split"
+type CropFocus = { x: number y: number }
+type SectionLayout = { x: number y: number width: number height: number }
+export type FrameType = "browser" | "mobile" | "laptop" | "tablet" | "monitor" | "glass" | "none"
+export type FrameFinish = "dark" | "silver" | "midnight"
+export type FrameRatio = "auto" | "16-9" | "9-16" | "1-1" | "4-3"
+export type FrameShadow = "deep" | "soft" | "glow" | "none"
+
+const splitGap = 2
+
+function ArrowUpRight({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M3.5 12.5 12.5 3.5M5 3.5h7.5V11"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+    </svg>
+  )
+}
+
+function UploadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M4 14.5v4.25A2.25 2.25 0 0 0 6.25 21h11.5A2.25 2.25 0 0 0 20 18.75V14.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function SunMoonIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={
+        className
+          ? `${className} lucide lucide-sun-moon`
+          : "lucide lucide-sun-moon"
+      }
+      aria-hidden="true"
+    >
+      <path d="M12 2v2" />
+      <path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715" />
+      <path d="M16 12a4 4 0 0 0-4-4" />
+      <path d="m19 5-1.256 1.256" />
+      <path d="M20 12h2" />
+    </svg>
+  )
+}
+
+function BrandLogo() {
+  return (
+    <svg
+      className="brand-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5" fill="currentColor" />
+      <rect
+        x="5.5"
+        y="5.5"
+        width="7"
+        height="13"
+        rx="2"
+        fill="var(--color-surface-panel)"
+      />
+      <rect
+        x="14.5"
+        y="5.5"
+        width="4"
+        height="13"
+        rx="2"
+        fill="var(--color-surface-panel)"
+        opacity="0.65"
+      />
+    </svg>
+  )
+}
+
+function LockIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        d="M4 6V4a4 4 0 1 1 8 0v2h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h2zm2-2a2 2 0 1 1 4 0v2H6V4z"
+      />
+    </svg>
+  )
+}
+
+function BrowserFrameIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <rect x="2" y="3" width="16" height="14" rx="2.5" />
+      <line x1="2" y1="7.5" x2="18" y2="7.5" />
+      <circle cx="4.5" cy="5.2" r="0.75" fill="currentColor" />
+      <circle cx="7" cy="5.2" r="0.75" fill="currentColor" />
+      <circle cx="9.5" cy="5.2" r="0.75" fill="currentColor" />
+    </svg>
+  )
+}
+
+function MobileFrameIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <rect x="5.5" y="2" width="9" height="16" rx="2.5" />
+      <line x1="8.5" y1="4" x2="11.5" y2="4" strokeLinecap="round" />
+      <line x1="8.5" y1="16" x2="11.5" y2="16" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function LaptopFrameIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <rect x="3.5" y="3" width="13" height="9" rx="1.5" />
+      <path d="M1.5 15h17l-1.5-2.5h-14L1.5 15z" strokeLinejoin="round" />
+      <line x1="8" y1="12.5" x2="12" y2="12.5" />
+    </svg>
+  )
+}
+
+function TabletFrameIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <rect x="3.5" y="2.5" width="13" height="15" rx="2.5" />
+      <circle cx="10" cy="4.2" r="0.6" fill="currentColor" />
+      <line x1="8.5" y1="16" x2="11.5" y2="16" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function MonitorFrameIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <rect x="2" y="3" width="16" height="11" rx="2" />
+      <path d="M7 17h6M10 14v3" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function GlassFrameIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <rect
+        x="2.5"
+        y="3.5"
+        width="15"
+        height="13"
+        rx="3"
+        strokeDasharray="2 2"
+      />
+      <line x1="4.5" y1="7" x2="15.5" y2="7" />
+    </svg>
+  )
+}
+
+function NoneFrameIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <rect x="3" y="3" width="14" height="14" rx="2" strokeDasharray="2 2" />
+    </svg>
+  )
+}
+
+function BrowserNavIcons() {
+  return (
+    <div className="browser-nav-group" aria-hidden="true">
+      <svg
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="nav-btn"
+      >
+        <path d="M10 12L6 8l4-4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <svg
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="nav-btn"
+      >
+        <path d="M6 12l4-4-4-4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <svg
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="nav-btn reload-btn"
+      >
+        <path
+          d="M13 8A5 5 0 1 1 8 3c1.8 0 3.4.9 4.3 2.3M13 2.5V5.5H10"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  )
+}
+
+function MobileStatusBar() {
+  return (
+    <div className="mobile-status-bar" aria-hidden="true">
+      <span className="status-time">9:41</span>
+      <div className="status-icons">
+        <svg className="status-signal" viewBox="0 0 16 12" fill="currentColor">
+          <rect x="1" y="8" width="2" height="4" rx="0.5" />
+          <rect x="5" y="6" width="2" height="6" rx="0.5" />
+          <rect x="9" y="3.5" width="2" height="8.5" rx="0.5" />
+          <rect x="13" y="1" width="2" height="11" rx="0.5" />
+        </svg>
+        <svg className="status-wifi" viewBox="0 0 16 12" fill="currentColor">
+          <path d="M8 9.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM4.5 7.8a4.9 4.9 0 0 1 7 0 .8.8 0 1 0 1.1-1.1 6.5 6.5 0 0 0-9.2 0 .8.8 0 1 0 1.1 1.1zm-3-3a9.1 9.1 0 0 1 13 0 .8.8 0 0 0 1.1-1.1 10.7 10.7 0 0 0-15.2 0 .8.8 0 0 0 1.1 1.1z" />
+        </svg>
+        <div className="status-battery">
+          <div className="battery-level" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const frameOptions = [
+  {
+    id: "browser",
+    label: "Browser",
+    icon: BrowserFrameIcon,
+    desc: "macOS Safari",
+  },
+  {
+    id: "mobile",
+    label: "Mobile",
+    icon: MobileFrameIcon,
+    desc: "iPhone 16 Pro",
+  },
+  { id: "laptop", label: "Laptop", icon: LaptopFrameIcon, desc: "MacBook Pro" },
+  { id: "tablet", label: "Tablet", icon: TabletFrameIcon, desc: "iPad Pro" },
+  {
+    id: "monitor",
+    label: "Monitor",
+    icon: MonitorFrameIcon,
+    desc: "Studio Display",
+  },
+  { id: "glass", label: "Glass", icon: GlassFrameIcon, desc: "Floating Glass" },
+  { id: "none", label: "Frameless", icon: NoneFrameIcon, desc: "Edge-to-Edge" },
+] as const
+
+const finishOptions = [
+  { id: "dark", label: "Dark Titanium", color: "#27272a" },
+  { id: "silver", label: "Silver", color: "#d4d4d8" },
+  { id: "midnight", label: "Midnight", color: "#1e293b" },
+] as const
+
+const ratioOptions = [
+  { id: "auto", label: "Fit", desc: "Responsive auto" },
+  { id: "16-9", label: "16:9", desc: "Desktop wide" },
+  { id: "9-16", label: "9:16", desc: "Tall / Height" },
+  { id: "4-3", label: "4:3", desc: "Classic display" },
+  { id: "1-1", label: "1:1", desc: "Social square" },
+] as const
+
+export function MockupCanvas({
+  mode,
+  images,
+  sections,
+  activeSection,
+  onActiveSectionChange,
+  onSectionChange,
+  primaryFocus,
+  onPrimaryFocusChange,
+  secondaryFocus,
+  onSecondaryFocusChange,
+  canvasBackground,
+  sectionRadius,
+  darkTheme,
+  frameType,
+  frameFinish,
+  frameGlare,
+  frameRatio,
+  frameUrl,
+  frameShadow,
+  onUploadClick,
+}: {
+  mode: Mode
+  images: string[]
+  sections: SectionLayout[]
+  activeSection: number
+  onActiveSectionChange: (section: number) => void
+  onSectionChange: (section: number, layout: SectionLayout) => void
+  primaryFocus: CropFocus
+  onPrimaryFocusChange: (focus: CropFocus) => void
+  secondaryFocus: CropFocus
+  onSecondaryFocusChange: (focus: CropFocus) => void
+  canvasBackground: string
+  sectionRadius: number
+  darkTheme: boolean
+  frameType: FrameType
+  frameFinish: FrameFinish
+  frameGlare: boolean
+  frameRatio: FrameRatio
+  frameUrl: string
+  frameShadow: FrameShadow
+  onUploadClick?: () => void
+}) {
+  const primaryImage = images[0]
+  const secondaryImage = images[1] || primaryImage
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const [draggingDivider, setDraggingDivider] = useState(false)
+  const [draggingCrop, setDraggingCrop] = useState(false)
+  const activeCrop = useRef<{
+    image: HTMLImageElement
+    onChange: (focus: CropFocus) => void
+    startX: number
+    startY: number
+    focus: CropFocus
+  } | null>(null)
+
+  const moveDivider = (event: PointerEvent<HTMLDivElement>) => {
+    if (!draggingDivider || !canvasRef.current) return
+    const { left, width } = canvasRef.current.getBoundingClientRect()
+    onSectionChange(0, {
+      ...sections[0],
+      width: Math.max(25, Math.min(90, ((event.clientX - left) / width) * 100)),
+    })
+  }
+
+  const moveCrop = (event: PointerEvent<HTMLElement>) => {
+    if (!draggingCrop || !activeCrop.current) return
+    const { image, onChange, startX, startY, focus } = activeCrop.current
+    const { width, height } = image.getBoundingClientRect()
+    onChange({
+      x: Math.max(
+        0,
+        Math.min(100, focus.x - ((event.clientX - startX) / width) * 100),
+      ),
+      y: Math.max(
+        0,
+        Math.min(100, focus.y - ((event.clientY - startY) / height) * 100),
+      ),
+    })
+  }
+
+  const cropImageProps = (
+    section: number,
+    focus: CropFocus,
+    onChange: (focus: CropFocus) => void,
+  ) => ({
+    className: "crop-photo",
+    draggable: false,
+    style: { objectPosition: `${focus.x}% ${focus.y}%` },
+    onPointerDown: (event: PointerEvent<HTMLImageElement>) => {
+      event.stopPropagation()
+      onActiveSectionChange(section)
+      event.currentTarget.setPointerCapture(event.pointerId)
+      activeCrop.current = {
+        image: event.currentTarget,
+        onChange,
+        startX: event.clientX,
+        startY: event.clientY,
+        focus,
+      }
+      setDraggingCrop(true)
+    },
+    onPointerMove: moveCrop,
+    onPointerUp: () => {
+      activeCrop.current = null
+      setDraggingCrop(false)
+    },
+    onPointerCancel: () => {
+      activeCrop.current = null
+      setDraggingCrop(false)
+    },
+  })
+
+  const renderContent = () => {
+    if (!primaryImage) {
+      return (
+        <div
+          className="empty-canvas-content"
+          onClick={onUploadClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              onUploadClick?.()
+            }
+          }}
+          title="Click to upload an image"
+        >
+          <div className="empty-icon-wrap" aria-hidden="true">
+            <UploadIcon />
+          </div>
+          <strong className="empty-title">Your image is the mockup.</strong>
+          <span className="empty-subtitle">Upload one image to begin.</span>
+          <button
+            type="button"
+            className="empty-upload-btn"
+            onClick={(e) => {
+              e.stopPropagation()
+              onUploadClick?.()
+            }}
+          >
+            Upload image
+          </button>
+        </div>
+      )
+    }
+
+    if (mode === "split") {
+      return (
+        <div className="split-atlas-content">
+          <div className="atlas-pages">
+            {[primaryImage, secondaryImage].map((image, index) => (
+              <article
+                key={index}
+                className={`atlas-page ${
+                  activeSection === index ? "is-selected" : ""
+                }`}
+                style={{
+                  left: `${sections[index].x}%`,
+                  top: `${sections[index].y}%`,
+                  width: `${sections[index].width}%`,
+                  height: `${sections[index].height}%`,
+                  borderRadius: `${sectionRadius}px`,
+                }}
+                onPointerDown={() => onActiveSectionChange(index)}
+              >
+                <img
+                  src={image}
+                  alt={`Uploaded website image, section ${index + 1}`}
+                  {...cropImageProps(
+                    index,
+                    index === 0 ? primaryFocus : secondaryFocus,
+                    index === 0 ? onPrimaryFocusChange : onSecondaryFocusChange,
+                  )}
+                />
+                <div className="red-wash" />
+              </article>
+            ))}
+          </div>
+          <div
+            className={`atlas-divider ${draggingDivider ? "is-active" : ""}`}
+            style={{ left: `${sections[0].x + sections[0].width}%` }}
+            role="separator"
+            aria-orientation="vertical"
+            aria-valuenow={Math.round(sections[0].width)}
+            aria-valuemin={25}
+            aria-valuemax={90}
+            title="Drag to resize Section 1 horizontally"
+            onPointerDown={(event) => {
+              event.preventDefault()
+              event.currentTarget.setPointerCapture(event.pointerId)
+              onActiveSectionChange(0)
+              setDraggingDivider(true)
+            }}
+          >
+            <span className="divider-handle">
+              <b />
+              <b />
+              <b />
+            </span>
+            <em className="divider-readout">
+              S1 · {Math.round(sections[0].width)}%
+            </em>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="mockup-visual">
+        <div
+          className="image-panel"
+          style={{ borderRadius: `${sectionRadius}px` }}
+        >
+          <img
+            src={primaryImage}
+            alt="Primary uploaded website image"
+            {...cropImageProps(0, primaryFocus, onPrimaryFocusChange)}
+          />
+          <div className="red-wash" />
+        </div>
+      </div>
+    )
+  }
+
+  const renderFrameShell = () => {
+    const content = renderContent()
+
+    switch (frameType) {
+      case "browser":
+        return (
+          <div className={`frame-shell frame-browser finish-${frameFinish}`}>
+            <div className="browser-titlebar">
+              <div className="browser-dots">
+                <span className="dot dot-red">
+                  <i>×</i>
+                </span>
+                <span className="dot dot-yellow">
+                  <i>−</i>
+                </span>
+                <span className="dot dot-green">
+                  <i>+</i>
+                </span>
+              </div>
+              <BrowserNavIcons />
+              <div className="browser-address-pill">
+                <LockIcon className="browser-lock-icon" />
+                <span className="browser-url-text">
+                  {frameUrl || "fitness-studio.io"}
+                </span>
+                <span className="browser-pill-badge">PRO</span>
+              </div>
+              <div className="browser-actions">
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  className="browser-action-icon"
+                >
+                  <path
+                    d="M8 2.5v7M5.5 5L8 2.5 10.5 5M3.5 9.5v3a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div className="frame-viewport-screen">
+              {content}
+              {frameGlare && (
+                <div className="frame-glare-overlay" aria-hidden="true" />
+              )}
+            </div>
+          </div>
+        )
+
+      case "mobile":
+        return (
+          <div className={`frame-shell frame-mobile finish-${frameFinish}`}>
+            <div className="mobile-button-action" />
+            <div className="mobile-button-vol-up" />
+            <div className="mobile-button-vol-down" />
+            <div className="mobile-button-power" />
+            <div className="mobile-chassis-bezel">
+              <MobileStatusBar />
+              <div className="mobile-dynamic-island">
+                <span className="island-camera" />
+                <span className="island-sensor" />
+              </div>
+              <div className="frame-viewport-screen mobile-screen">
+                {content}
+                {frameGlare && (
+                  <div className="frame-glare-overlay" aria-hidden="true" />
+                )}
+              </div>
+              <div className="mobile-home-indicator-bar">
+                <span className="home-bar" />
+              </div>
+            </div>
+          </div>
+        )
+
+      case "laptop":
+        return (
+          <div className={`frame-shell frame-laptop finish-${frameFinish}`}>
+            <div className="laptop-lid">
+              <div className="laptop-top-bezel">
+                <div className="laptop-camera-notch">
+                  <span className="laptop-camera-lens" />
+                </div>
+              </div>
+              <div className="frame-viewport-screen laptop-screen">
+                {content}
+                {frameGlare && (
+                  <div className="frame-glare-overlay" aria-hidden="true" />
+                )}
+              </div>
+            </div>
+            <div className="laptop-base-deck">
+              <div className="laptop-notch-indent" />
+            </div>
+          </div>
+        )
+
+      case "tablet":
+        return (
+          <div className={`frame-shell frame-tablet finish-${frameFinish}`}>
+            <div className="tablet-button-power" />
+            <div className="tablet-button-volume" />
+            <div className="tablet-chassis-bezel">
+              <div className="tablet-camera-dot">
+                <span className="camera-glint" />
+              </div>
+              <div className="frame-viewport-screen tablet-screen">
+                {content}
+                {frameGlare && (
+                  <div className="frame-glare-overlay" aria-hidden="true" />
+                )}
+              </div>
+              <div className="tablet-home-indicator-bar">
+                <span className="home-bar" />
+              </div>
+            </div>
+          </div>
+        )
+
+      case "monitor":
+        return (
+          <div className={`frame-shell frame-monitor finish-${frameFinish}`}>
+            <div className="monitor-display">
+              <div className="monitor-top-bezel">
+                <span className="monitor-camera-lens" />
+                <span className="monitor-camera-led" />
+              </div>
+              <div className="frame-viewport-screen monitor-screen">
+                {content}
+                {frameGlare && (
+                  <div className="frame-glare-overlay" aria-hidden="true" />
+                )}
+              </div>
+              <div className="monitor-chin-bar">
+                <span className="monitor-brand-dot" />
+              </div>
+            </div>
+            <div className="monitor-stand-assembly">
+              <div className="monitor-neck" />
+              <div className="monitor-foot" />
+            </div>
+          </div>
+        )
+
+      case "glass":
+        return (
+          <div className={`frame-shell frame-glass finish-${frameFinish}`}>
+            <div className="glass-titlebar">
+              <div className="glass-dots">
+                <span className="glass-dot" />
+                <span className="glass-dot" />
+                <span className="glass-dot" />
+              </div>
+              <span className="glass-domain">
+                {frameUrl || "fitness-pro.app"}
+              </span>
+              <div className="glass-badge">GLAZED</div>
+            </div>
+            <div className="frame-viewport-screen glass-screen">
+              {content}
+              {frameGlare && (
+                <div className="frame-glare-overlay" aria-hidden="true" />
+              )}
+            </div>
+          </div>
+        )
+
+      case "none":
+      default:
+        return (
+          <div className="frame-shell frame-none">
+            <div className="frame-viewport-screen">
+              {content}
+              {frameGlare && (
+                <div className="frame-glare-overlay" aria-hidden="true" />
+              )}
+            </div>
+          </div>
+        )
+    }
+  }
+
+  const defaultCanvasBg = darkTheme ? "#18181c" : "#f9fafb"
+  const effectiveBg =
+    canvasBackground === "#111111"
+      ? primaryImage
+        ? "#111111"
+        : defaultCanvasBg
+      : canvasBackground
+
+  return (
+    <div
+      id="mockup-canvas"
+      ref={canvasRef}
+      className={`mockup-canvas frame-mode-${frameType} finish-${frameFinish} ratio-${frameRatio} shadow-${frameShadow} ${
+        !primaryImage ? "is-empty" : ""
+      }`}
+      style={{ background: effectiveBg }}
+      onPointerMove={(event) => {
+        moveDivider(event)
+        moveCrop(event)
+      }}
+      onPointerUp={() => {
+        setDraggingDivider(false)
+        setDraggingCrop(false)
+      }}
+      onPointerLeave={() => {
+        setDraggingDivider(false)
+        setDraggingCrop(false)
+      }}
+    >
+      <div className="mockup-frame-container">{renderFrameShell()}</div>
+    </div>
+  )
+}
+
+function ChatBubbleIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  )
+}
+
+function XBrandIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  )
+}
+
+function ExternalLinkIcon({ className = "w-3 h-3" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  )
+}
+
+function FloatingSuggestionBox() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [suggestion, setSuggestion] = useState("")
+  const boxRef = useRef<HTMLDivElement>(null)
+  const xProfileUrl = "https://x.com/mushfiqk47"
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handleClickOutside = (event: MouseEvent) => {
+      if (boxRef.current && !boxRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isOpen])
+
+  const handlePostOnX = () => {
+    const text = suggestion.trim()
+      ? `Hey @mushfiqk47, suggestion for MockForge: ${suggestion.trim()}`
+      : `Hey @mushfiqk47, I have an idea for MockForge: `
+    const tweetIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`
+    window.open(tweetIntent, "_blank", "noopener,noreferrer")
+  }
+
+  const handleQuickTag = (tag: string) => {
+    setSuggestion((prev) => (prev ? `${prev} · ${tag}` : tag))
+  }
+
+  return (
+    <div ref={boxRef} className="floating-suggest-container no-export">
+      {isOpen && (
+        <div
+          className="floating-suggest-box"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Suggest Improvements"
+        >
+          <div className="suggest-box-header">
+            <a
+              href={xProfileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="suggest-author-link"
+              title="View @mushfiqk47 on X"
+            >
+              <span className="suggest-x-icon">
+                <XBrandIcon />
+              </span>
+              <span className="suggest-author-handle">@mushfiqk47</span>
+            </a>
+            <button
+              type="button"
+              className="suggest-close-btn"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close suggestion box"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="suggest-box-body">
+            <h3 className="suggest-title">Suggest Improvements</h3>
+            <p className="suggest-subtitle">
+              Have an idea, new frame request, or feedback? Share it directly on
+              X with @mushfiqk47!
+            </p>
+
+            <textarea
+              className="suggest-textarea"
+              value={suggestion}
+              onChange={(e) => setSuggestion(e.target.value)}
+              placeholder="What would make MockForge better for your workflow?"
+              rows={3}
+            />
+
+            <div className="suggest-tags">
+              {[
+                "+ New frame",
+                "+ Video mockups",
+                "+ 3D tilt",
+                "+ Export format",
+              ].map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className="suggest-tag-chip"
+                  onClick={() => handleQuickTag(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+
+            <div className="suggest-actions">
+              <button
+                type="button"
+                className="suggest-tweet-btn"
+                onClick={handlePostOnX}
+                title="Post this suggestion to @mushfiqk47 on X"
+              >
+                <XBrandIcon />
+                <span>Post on X</span>
+              </button>
+              <a
+                href={xProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="suggest-dm-link"
+                title="Send a Direct Message to @mushfiqk47 on X"
+              >
+                <span>DM on X</span>
+                <ExternalLinkIcon />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <button
+        type="button"
+        className={`floating-suggest-pill ${isOpen ? "is-open" : ""}`}
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-expanded={isOpen}
+        title="Suggest improvements or contact @mushfiqk47 on X"
+      >
+        <ChatBubbleIcon className="suggest-bubble-icon" />
+        <span className="suggest-pill-text">Suggest Improvements</span>
+      </button>
+    </div>
+  )
+}
+
+export default function App() {
+  const [images, setImages] = useState<string[]>([])
+  const [mode, setMode] = useState<Mode>("single")
+  const [dragging, setDragging] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [sections, setSections] = useState<SectionLayout[]>([
+    { x: 0, y: 0, width: 62, height: 100 },
+    { x: 64, y: 0, width: 36, height: 100 },
+  ])
+  const [activeSection, setActiveSection] = useState(0)
+  const [primaryFocus, setPrimaryFocus] = useState<CropFocus>({ x: 50, y: 50 })
+  const [secondaryFocus, setSecondaryFocus] = useState<CropFocus>({
+    x: 50,
+    y: 50,
+  })
+  const [canvasBackground, setCanvasBackground] = useState("#111111")
+  const [sectionRadius, setSectionRadius] = useState(0)
+  const [darkTheme, setDarkTheme] = useState(true)
+
+  // Preview Frame States
+  const [frameType, setFrameType] = useState<FrameType>("browser")
+  const [frameFinish, setFrameFinish] = useState<FrameFinish>("dark")
+  const [frameGlare, setFrameGlare] = useState<boolean>(true)
+  const [frameRatio, setFrameRatio] = useState<FrameRatio>("auto")
+  const [frameUrl, setFrameUrl] = useState("fitness-pro.io")
+  const [frameShadow, setFrameShadow] = useState<FrameShadow>("deep")
+
+  const inputRef = useRef<HTMLInputElement>(null)
+  const backgroundInputRef = useRef<HTMLInputElement>(null)
+  const imagesRef = useRef<string[]>([])
+
+  useEffect(() => {
+    if (images.length >= 2) setMode("split")
+    else if (images.length === 1) setMode("single")
+  }, [images.length])
+
+  useEffect(() => {
+    imagesRef.current = images
+  }, [images])
+
+  useEffect(
+    () => () =>
+      imagesRef.current.forEach((url) => {
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url)
+      }),
+    [],
+  )
+
+  const addFiles = (files: FileList | File[]) => {
+    const file = Array.from(files).find((item) =>
+      item.type.startsWith("image/"),
+    )
+    if (!file) return
+    setImages((old) => (old.length < 1 ? [URL.createObjectURL(file)] : old))
+  }
+
+  const handleFiles = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) addFiles(event.target.files)
+    event.target.value = ""
+  }
+
+  const drop = (event: DragEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    setDragging(false)
+    if (event.dataTransfer.files) addFiles(event.dataTransfer.files)
+  }
+
+  const setBackgroundImage = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file || !file.type.startsWith("image/")) return
+    const reader = new FileReader()
+    reader.onload = () =>
+      setCanvasBackground(
+        `url(${reader.result as string}) center / cover no-repeat`,
+      )
+    reader.readAsDataURL(file)
+    event.target.value = ""
+  }
+
+  const updateSection = (sectionIndex: number, layout: SectionLayout) =>
+    setSections((current) => {
+      const next = current.map((section, index) =>
+        index === sectionIndex ? layout : section,
+      )
+      if (sectionIndex === 0) {
+        const width = Math.max(25, Math.min(88, layout.width))
+        const x = Math.max(0, Math.min(63, layout.x))
+        next[0] = { ...layout, x, width }
+        next[1] = {
+          ...current[1],
+          x: x + width + splitGap,
+          width: Math.max(10, 100 - x - width - splitGap),
+        }
+      }
+      return next
+    })
+
+  const selectedLayout = sections[activeSection]
+  const updateSelectedLayout = (
+    property: keyof SectionLayout,
+    value: number,
+  ) => {
+    if (activeSection === 1 && (property === "width" || property === "x"))
+      return
+    updateSection(activeSection, { ...selectedLayout, [property]: value })
+  }
+
+  const exportCanvas = async () => {
+    if (!images[0]) return
+    const node = document.getElementById("mockup-canvas")
+    if (!node) return
+    setExporting(true)
+    node.classList.add("is-exporting")
+    const canvasImages = Array.from(node.querySelectorAll("img"))
+    const originalSources = canvasImages.map((image) => image.src)
+    try {
+      await Promise.all(
+        canvasImages.map(async (image) => {
+          if (!image.complete || !image.naturalWidth || !image.naturalHeight)
+            return
+          const snapshot = document.createElement("canvas")
+          snapshot.width = image.naturalWidth
+          snapshot.height = image.naturalHeight
+          const context = snapshot.getContext("2d")
+          if (!context) return
+          context.drawImage(image, 0, 0)
+          image.src = snapshot.toDataURL("image/png")
+          try {
+            await image.decode()
+          } catch {}
+        }),
+      )
+      const rect = node.getBoundingClientRect()
+      const dataUrl = await toPng(node, {
+        pixelRatio: Math.max(3, Math.min(4, 3840 / Math.max(rect.width, 1))),
+        cacheBust: false,
+        skipFonts: true,
+        backgroundColor: "#111111",
+        width: rect.width,
+        height: rect.height,
+        filter: (element) => !element.classList?.contains("atlas-divider"),
+      })
+      const link = document.createElement("a")
+      link.download = `mockup-forge-${frameType}.png`
+      link.href = dataUrl
+      link.click()
+    } catch (error) {
+      console.error("Export failed", error)
+    } finally {
+      canvasImages.forEach((image, index) => {
+        image.src = originalSources[index]
+      })
+      node.classList.remove("is-exporting")
+      setExporting(false)
+    }
+  }
+
+  return (
+    <main className={`app-shell ${darkTheme ? "theme-dark" : ""}`}>
+      <aside className="control-panel">
+        <div className="control-panel-scroll">
+          <header className="brand-header">
+            <div className="brand-identity">
+              <BrandLogo />
+              <span className="brand-name">MockForge</span>
+            </div>
+            <button
+              type="button"
+              className="theme-icon-button"
+              onClick={() => setDarkTheme((value) => !value)}
+              aria-label={
+                darkTheme ? "Switch to light theme" : "Switch to dark theme"
+              }
+              title={
+                darkTheme ? "Switch to light theme" : "Switch to dark theme"
+              }
+            >
+              <SunMoonIcon className="theme-toggle-icon" />
+            </button>
+          </header>
+
+          {/* Imagery Section */}
+          <section className="tool-section">
+            <div className="section-head">
+              <span>Imagery</span>
+              <span>{images.length}/1</span>
+            </div>
+            {images.length === 0 && (
+              <button
+                className={`dropzone ${dragging ? "is-dragging" : ""}`}
+                onClick={() => inputRef.current?.click()}
+                onDrop={drop}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setDragging(true)
+                }}
+                onDragLeave={() => setDragging(false)}
+              >
+                <UploadIcon />
+                <strong>Upload one image</strong>
+                <small>JPG, PNG or WEBP · 10MB max</small>
+              </button>
+            )}
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={handleFiles}
+            />
+            {images.length > 0 && (
+              <div className="image-chips">
+                {images.map((image, index) => (
+                  <div className="image-chip" key={image}>
+                    <img src={image} alt="Selected upload" />
+                    <span>IMAGE 0{index + 1}</span>
+                    <button
+                      onClick={() =>
+                        setImages((old) => old.filter((_, i) => i !== index))
+                      }
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Format Section */}
+          <section className="tool-section">
+            <div className="section-head">
+              <span>Format</span>
+              <span>LIVE</span>
+            </div>
+            <div className="mode-toggle">
+              <button
+                className={mode === "single" ? "active" : ""}
+                onClick={() => setMode("single")}
+              >
+                <span className="mode-icon single-icon" />
+                Single hero
+              </button>
+              <button
+                className={mode === "split" ? "active" : ""}
+                onClick={() => setMode("split")}
+              >
+                <span className="mode-icon split-icon" />
+                Split hero
+              </button>
+            </div>
+          </section>
+
+          {/* Preview Frame Section */}
+          <section className="tool-section preview-frame-section">
+            <div className="section-head">
+              <span>Preview frame</span>
+              <span>{frameType.toUpperCase()}</span>
+            </div>
+
+            {/* Frame Model Grid */}
+            <div className="frame-type-grid">
+              {frameOptions.map(({ id, label, icon: Icon, desc }) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`frame-option-card ${
+                    frameType === id ? "is-active" : ""
+                  }`}
+                  onClick={() => setFrameType(id)}
+                  title={desc}
+                >
+                  <div className="frame-card-icon">
+                    <Icon />
+                  </div>
+                  <span className="frame-card-label">{label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Finish & Glare Row */}
+            <div className="frame-subcontrol">
+              <div className="subcontrol-head">
+                <span>Finish & sheen</span>
+                <b>{finishOptions.find((f) => f.id === frameFinish)?.label}</b>
+              </div>
+              <div className="finish-chips">
+                {finishOptions.map(({ id, label, color }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`finish-chip ${
+                      frameFinish === id ? "is-active" : ""
+                    }`}
+                    onClick={() => setFrameFinish(id)}
+                    title={label}
+                  >
+                    <span
+                      className="finish-color-dot"
+                      style={{ background: color }}
+                    />
+                    {label.split(" ")[0]}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className={`glare-toggle-chip ${
+                    frameGlare ? "is-active" : ""
+                  }`}
+                  onClick={() => setFrameGlare((v) => !v)}
+                  title="Toggle 3D Screen Glass Sheen Reflection"
+                >
+                  <span className="glare-star">✦</span>
+                  {frameGlare ? "Glare on" : "No glare"}
+                </button>
+              </div>
+            </div>
+
+            {/* Frame Height & Ratio */}
+            <div className="frame-subcontrol">
+              <div className="subcontrol-head">
+                <span>Frame height & ratio</span>
+                <b>
+                  {frameRatio === "9-16"
+                    ? "Tall / 9:16"
+                    : frameRatio.toUpperCase()}
+                </b>
+              </div>
+              <div className="ratio-chips">
+                {ratioOptions.map(({ id, label, desc }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`ratio-chip ${
+                      frameRatio === id ? "is-active" : ""
+                    }`}
+                    onClick={() => setFrameRatio(id)}
+                    title={`${label} · ${desc}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(frameType === "browser" || frameType === "glass") && (
+              <div className="frame-url-control">
+                <label>
+                  <span>Header URL</span>
+                  <input
+                    type="text"
+                    value={frameUrl}
+                    placeholder="e.g. fitness-pro.io"
+                    onChange={(e) => setFrameUrl(e.target.value)}
+                  />
+                </label>
+              </div>
+            )}
+
+            <div className="frame-subcontrol">
+              <div className="subcontrol-head">
+                <span>Frame elevation</span>
+                <b>{frameShadow}</b>
+              </div>
+              <div className="shadow-chips">
+                {(["deep", "soft", "glow", "none"] as const).map((shadow) => (
+                  <button
+                    key={shadow}
+                    type="button"
+                    className={`ratio-chip ${
+                      frameShadow === shadow ? "is-active" : ""
+                    }`}
+                    onClick={() => setFrameShadow(shadow)}
+                  >
+                    {shadow.charAt(0).toUpperCase() + shadow.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Canvas Background Section */}
+          <section className="tool-section background-picker">
+            <div className="section-head">
+              <span>Canvas background</span>
+              <span>LIVE</span>
+            </div>
+            <div className="background-controls">
+              <label className="color-control">
+                <span>Color</span>
+                <input
+                  type="color"
+                  value={
+                    canvasBackground.startsWith("#")
+                      ? canvasBackground
+                      : "#111111"
+                  }
+                  onChange={(event) => setCanvasBackground(event.target.value)}
+                />
+              </label>
+              <div className="gradient-options">
+                {[
+                  ["solid", "Black background", "#111111"],
+                  [
+                    "ember",
+                    "Red glow gradient",
+                    "radial-gradient(circle at 80% 15%, #8d251f 0%, #1c1010 42%, #111111 100%)",
+                  ],
+                  [
+                    "violet",
+                    "Violet gradient",
+                    "linear-gradient(135deg, #111111 0%, #272041 52%, #6b275c 100%)",
+                  ],
+                  [
+                    "sunset",
+                    "Sunset gradient",
+                    "linear-gradient(135deg, #16100f 0%, #803326 52%, #e2a74b 100%)",
+                  ],
+                  [
+                    "ocean",
+                    "Ocean gradient",
+                    "linear-gradient(145deg, #061521 0%, #126e82 52%, #8ce3e0 100%)",
+                  ],
+                  [
+                    "cobalt",
+                    "Cobalt gradient",
+                    "linear-gradient(135deg, #09163a 0%, #2355d9 55%, #8fb3ff 100%)",
+                  ],
+                  [
+                    "orchid",
+                    "Orchid gradient",
+                    "linear-gradient(135deg, #25102e 0%, #9b3ca5 50%, #f7a6cb 100%)",
+                  ],
+                  [
+                    "forest",
+                    "Forest gradient",
+                    "linear-gradient(135deg, #071c16 0%, #25765f 55%, #a8d98c 100%)",
+                  ],
+                  [
+                    "sand",
+                    "Sand gradient",
+                    "linear-gradient(135deg, #2c2016 0%, #b77a45 55%, #f5ddb0 100%)",
+                  ],
+                  [
+                    "rose",
+                    "Rose gradient",
+                    "linear-gradient(135deg, #2b1016 0%, #c23d67 50%, #ffc0bd 100%)",
+                  ],
+                  [
+                    "slate",
+                    "Slate gradient",
+                    "linear-gradient(135deg, #111827 0%, #485569 52%, #d7dee6 100%)",
+                  ],
+                  [
+                    "lime",
+                    "Lime gradient",
+                    "linear-gradient(135deg, #111809 0%, #6e9833 52%, #e2ff7b 100%)",
+                  ],
+                  [
+                    "studio-3d",
+                    "Studio 3D backdrop",
+                    `url(${studioMonitorFrame}) center / cover no-repeat`,
+                  ],
+                  [
+                    "mobile-3d",
+                    "Mobile 3D backdrop",
+                    `url(${mobileTallFrame}) center / cover no-repeat`,
+                  ],
+                  [
+                    "laptop-3d",
+                    "Laptop 3D backdrop",
+                    `url(${laptopProFrame}) center / cover no-repeat`,
+                  ],
+                ].map(([name, label, value]) => (
+                  <button
+                    key={name}
+                    aria-label={label}
+                    className={`background-swatch ${name}`}
+                    onClick={() => setCanvasBackground(value)}
+                    style={
+                      value.startsWith("url") ? { backgroundImage: value } : {}
+                    }
+                  />
+                ))}
+              </div>
+              <button
+                className="background-upload"
+                onClick={() => backgroundInputRef.current?.click()}
+              >
+                Upload background
+              </button>
+              <input
+                ref={backgroundInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={setBackgroundImage}
+              />
+            </div>
+          </section>
+
+          {/* Split Inspector Section */}
+          {mode === "split" && images[0] && (
+            <section className="tool-section split-inspector">
+              <div className="section-head">
+                <span>Split section</span>
+                <span>S{activeSection + 1}</span>
+              </div>
+              <div className="section-tabs">
+                <button
+                  className={activeSection === 0 ? "active" : ""}
+                  onClick={() => setActiveSection(0)}
+                >
+                  Section 1
+                </button>
+                <button
+                  className={activeSection === 1 ? "active" : ""}
+                  onClick={() => setActiveSection(1)}
+                >
+                  Section 2
+                </button>
+              </div>
+              <div className="dimension-controls">
+                {([
+                  ["width", "Horizontal size", 25, 100],
+                  ["height", "Vertical size", 25, 100],
+                  ["x", "Horizontal position", 0, 85],
+                  ["y", "Vertical position", 0, 75],
+                ] as const).map(([property, label, min, max]) => {
+                  const automatic =
+                    activeSection === 1 &&
+                    (property === "width" || property === "x")
+                  const progress =
+                    ((selectedLayout[property] - min) / (max - min)) * 100
+                  return (
+                    <label
+                      key={property}
+                      className={automatic ? "is-automatic" : ""}
+                    >
+                      <span>
+                        {label}
+                        <b>
+                          {automatic
+                            ? `Auto · ${Math.round(selectedLayout[property])}%`
+                            : `${Math.round(selectedLayout[property])}%`}
+                        </b>
+                      </span>
+                      <input
+                        type="range"
+                        min={min}
+                        max={max}
+                        value={selectedLayout[property]}
+                        disabled={automatic}
+                        style={{
+                          background: `linear-gradient(to right, var(--color-slider-fill) 0%, var(--color-slider-fill) ${progress}%, var(--color-slider-track) ${progress}%, var(--color-slider-track) 100%)`,
+                        }}
+                        onChange={(event) =>
+                          updateSelectedLayout(
+                            property,
+                            Number(event.target.value),
+                          )
+                        }
+                      />
+                    </label>
+                  )
+                })}
+              </div>
+              <label className="radius-control">
+                <span>
+                  Both sections · corner radius <b>{sectionRadius}px</b>
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="48"
+                  value={sectionRadius}
+                  style={{
+                    background: `linear-gradient(to right, var(--color-slider-fill) 0%, var(--color-slider-fill) ${(sectionRadius / 48) * 100}%, var(--color-slider-track) ${(sectionRadius / 48) * 100}%, var(--color-slider-track) 100%)`,
+                  }}
+                  onChange={(event) =>
+                    setSectionRadius(Number(event.target.value))
+                  }
+                />
+              </label>
+            </section>
+          )}
+        </div>
+
+        {/* Docked Export Footer */}
+        <footer className="control-panel-footer">
+          <button
+            className="export-button"
+            onClick={exportCanvas}
+            disabled={exporting}
+          >
+            {exporting ? "Rendering..." : "Export PNG"} <ArrowUpRight />
+          </button>
+        </footer>
+      </aside>
+
+      {/* Stage Frame Area */}
+      <section className="stage stage-ember">
+        <div className="stage-frame">
+          <MockupCanvas
+            mode={mode}
+            images={images}
+            sections={sections}
+            activeSection={activeSection}
+            onActiveSectionChange={setActiveSection}
+            onSectionChange={updateSection}
+            primaryFocus={primaryFocus}
+            onPrimaryFocusChange={setPrimaryFocus}
+            secondaryFocus={secondaryFocus}
+            onSecondaryFocusChange={setSecondaryFocus}
+            canvasBackground={canvasBackground}
+            sectionRadius={sectionRadius}
+            darkTheme={darkTheme}
+            frameType={frameType}
+            frameFinish={frameFinish}
+            frameGlare={frameGlare}
+            frameRatio={frameRatio}
+            frameUrl={frameUrl}
+            frameShadow={frameShadow}
+            onUploadClick={() => inputRef.current?.click()}
+          />
+          <div className="frame-corner top left" />
+          <div className="frame-corner top right" />
+          <div className="frame-corner bottom left" />
+          <div className="frame-corner bottom right" />
+        </div>
+      </section>
+
+      <FloatingSuggestionBox />
+    </main>
+  )
+}
