@@ -594,7 +594,10 @@ export function MockupCanvas({
     switch (frameType) {
       case "browser":
         return (
-          <div className={`frame-shell frame-browser finish-${frameFinish}`}>
+          <div
+            className={`frame-shell frame-browser finish-${frameFinish}`}
+            style={{ borderRadius: `${sectionRadius}px` }}
+          >
             <div className="browser-titlebar">
               <div className="browser-titlebar-left">
                 <div className="browser-dots" aria-hidden="true">
@@ -768,7 +771,10 @@ export function MockupCanvas({
 
       case "glass":
         return (
-          <div className={`frame-shell frame-glass finish-${frameFinish}`}>
+          <div
+            className={`frame-shell frame-glass finish-${frameFinish}`}
+            style={{ borderRadius: `${sectionRadius}px` }}
+          >
             <div className="glass-titlebar">
               <div className="glass-dots">
                 <span className="glass-dot" />
@@ -780,7 +786,13 @@ export function MockupCanvas({
               </span>
               <div className="glass-badge">GLAZED</div>
             </div>
-            <div className="frame-viewport-screen glass-screen">
+            <div
+              className="frame-viewport-screen glass-screen"
+              style={{
+                borderBottomLeftRadius: `${sectionRadius}px`,
+                borderBottomRightRadius: `${sectionRadius}px`,
+              }}
+            >
               {content}
               {frameGlare && (
                 <div className="frame-glare-overlay" aria-hidden="true" />
@@ -792,8 +804,14 @@ export function MockupCanvas({
       case "none":
       default:
         return (
-          <div className="frame-shell frame-none">
-            <div className="frame-viewport-screen">
+          <div
+            className="frame-shell frame-none"
+            style={{ borderRadius: `${sectionRadius}px` }}
+          >
+            <div
+              className="frame-viewport-screen"
+              style={{ borderRadius: `${sectionRadius}px` }}
+            >
               {content}
               {frameGlare && (
                 <div className="frame-glare-overlay" aria-hidden="true" />
@@ -1077,7 +1095,7 @@ export default function App() {
     y: 50,
   })
   const [canvasBackground, setCanvasBackground] = useState("#111111")
-  const [sectionRadius, setSectionRadius] = useState(0)
+  const [sectionRadius, setSectionRadius] = useState(14)
   const [darkTheme, setDarkTheme] = useState(true)
 
   // Preview Frame States
@@ -1431,6 +1449,43 @@ export default function App() {
                 </label>
               </div>
             )}
+
+            {/* Corner Radius Control */}
+            <div className="frame-subcontrol">
+              <div className="subcontrol-head">
+                <span>Corner radius</span>
+                <b>{sectionRadius}px</b>
+              </div>
+              <div className="radius-control-slider">
+                <input
+                  type="range"
+                  min="0"
+                  max="48"
+                  value={sectionRadius}
+                  style={{
+                    background: `linear-gradient(to right, var(--color-slider-fill) 0%, var(--color-slider-fill) ${(sectionRadius / 48) * 100}%, var(--color-slider-track) ${(sectionRadius / 48) * 100}%, var(--color-slider-track) 100%)`,
+                  }}
+                  onChange={(event) =>
+                    setSectionRadius(Number(event.target.value))
+                  }
+                  aria-label="Corner radius"
+                />
+                <div className="radius-quick-presets">
+                  {[0, 8, 14, 24, 36].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      className={`radius-preset-chip ${
+                        sectionRadius === r ? "is-active" : ""
+                      }`}
+                      onClick={() => setSectionRadius(r)}
+                    >
+                      {r === 0 ? "Square" : `${r}px`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             <div className="frame-subcontrol">
               <div className="subcontrol-head">
