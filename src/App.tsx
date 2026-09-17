@@ -7,12 +7,177 @@ import laptopProFrame from "./Frame/laptop_pro_frame.jpg"
 type Mode = "single" | "split"
 type CropFocus = { x: number y: number }
 type SectionLayout = { x: number y: number width: number height: number }
-export type FrameType = "browser" | "mobile" | "laptop" | "tablet" | "monitor" | "glass" | "none"
+export type FrameType = "browser" | "mobile" | "laptop" | "tablet" | "monitor" | "none"
 export type FrameFinish = "dark" | "silver" | "midnight"
 export type FrameRatio = "auto" | "16-9" | "9-16" | "1-1" | "4-3"
 export type FrameShadow = "deep" | "soft" | "glow" | "none"
 
 const splitGap = 2
+
+const backgroundPresets: [string, string, string][] = [
+  ["white", "Pure White", "#ffffff"],
+  ["light-gray", "Light Gray", "#f3f4f6"],
+  ["solid", "Black background", "#111111"],
+  [
+    "ember",
+    "Red glow gradient",
+    "radial-gradient(circle at 80% 15%, #8d251f 0%, #1c1010 42%, #111111 100%)",
+  ],
+  [
+    "violet",
+    "Violet gradient",
+    "linear-gradient(135deg, #111111 0%, #272041 52%, #6b275c 100%)",
+  ],
+  [
+    "sunset",
+    "Sunset gradient",
+    "linear-gradient(135deg, #16100f 0%, #803326 52%, #e2a74b 100%)",
+  ],
+  [
+    "ocean",
+    "Ocean gradient",
+    "linear-gradient(145deg, #061521 0%, #126e82 52%, #8ce3e0 100%)",
+  ],
+  [
+    "cobalt",
+    "Cobalt gradient",
+    "linear-gradient(135deg, #09163a 0%, #2355d9 55%, #8fb3ff 100%)",
+  ],
+  [
+    "orchid",
+    "Orchid gradient",
+    "linear-gradient(135deg, #25102e 0%, #9b3ca5 50%, #f7a6cb 100%)",
+  ],
+  [
+    "forest",
+    "Forest gradient",
+    "linear-gradient(135deg, #071c16 0%, #25765f 55%, #a8d98c 100%)",
+  ],
+  [
+    "sand",
+    "Sand gradient",
+    "linear-gradient(135deg, #2c2016 0%, #b77a45 55%, #f5ddb0 100%)",
+  ],
+  [
+    "rose",
+    "Rose gradient",
+    "linear-gradient(135deg, #2b1016 0%, #c23d67 50%, #ffc0bd 100%)",
+  ],
+  [
+    "slate",
+    "Slate gradient",
+    "linear-gradient(135deg, #111827 0%, #485569 52%, #d7dee6 100%)",
+  ],
+  [
+    "lime",
+    "Lime gradient",
+    "linear-gradient(135deg, #111809 0%, #6e9833 52%, #e2ff7b 100%)",
+  ],
+  [
+    "studio-3d",
+    "Studio 3D backdrop",
+    `url(${studioMonitorFrame}) center / cover no-repeat`,
+  ],
+  [
+    "mobile-3d",
+    "Mobile 3D backdrop",
+    `url(${mobileTallFrame}) center / cover no-repeat`,
+  ],
+  [
+    "laptop-3d",
+    "Laptop 3D backdrop",
+    `url(${laptopProFrame}) center / cover no-repeat`,
+  ],
+]
+
+const frameBgPresets: [string, string, string][] = [
+  ["white", "Pure White", "#ffffff"],
+  ["solid", "Pure Black", "#000000"],
+  ["light-gray", "Light Gray", "#f3f4f6"],
+  ["zinc", "Dark Zinc", "#18181b"],
+  [
+    "ember",
+    "Red glow gradient",
+    "radial-gradient(circle at 80% 15%, #8d251f 0%, #1c1010 42%, #111111 100%)",
+  ],
+  [
+    "violet",
+    "Violet gradient",
+    "linear-gradient(135deg, #111111 0%, #272041 52%, #6b275c 100%)",
+  ],
+  [
+    "sunset",
+    "Sunset gradient",
+    "linear-gradient(135deg, #16100f 0%, #803326 52%, #e2a74b 100%)",
+  ],
+  [
+    "ocean",
+    "Ocean gradient",
+    "linear-gradient(145deg, #061521 0%, #126e82 52%, #8ce3e0 100%)",
+  ],
+  [
+    "cobalt",
+    "Cobalt gradient",
+    "linear-gradient(135deg, #09163a 0%, #2355d9 55%, #8fb3ff 100%)",
+  ],
+  [
+    "orchid",
+    "Orchid gradient",
+    "linear-gradient(135deg, #25102e 0%, #9b3ca5 50%, #f7a6cb 100%)",
+  ],
+  [
+    "forest",
+    "Forest gradient",
+    "linear-gradient(135deg, #071c16 0%, #25765f 55%, #a8d98c 100%)",
+  ],
+  [
+    "sand",
+    "Sand gradient",
+    "linear-gradient(135deg, #2c2016 0%, #b77a45 55%, #f5ddb0 100%)",
+  ],
+  [
+    "rose",
+    "Rose gradient",
+    "linear-gradient(135deg, #2b1016 0%, #c23d67 50%, #ffc0bd 100%)",
+  ],
+  [
+    "slate",
+    "Slate gradient",
+    "linear-gradient(135deg, #111827 0%, #485569 52%, #d7dee6 100%)",
+  ],
+  [
+    "lime",
+    "Lime gradient",
+    "linear-gradient(135deg, #111809 0%, #6e9833 52%, #e2ff7b 100%)",
+  ],
+]
+
+function isLightColor(color: string): boolean {
+  if (
+    !color ||
+    color.startsWith("linear") ||
+    color.startsWith("radial") ||
+    color.startsWith("url")
+  )
+    return false
+  const trimmed = color.trim().toLowerCase()
+  if (
+    trimmed === "#fff" ||
+    trimmed === "#ffffff" ||
+    trimmed === "#f3f4f6" ||
+    trimmed === "#f4f4f5" ||
+    trimmed === "#fafafa"
+  )
+    return true
+  const hex = trimmed.replace("#", "")
+  if (hex.length === 6) {
+    const r = parseInt(hex.substring(0, 2), 16)
+    const g = parseInt(hex.substring(2, 4), 16)
+    const b = parseInt(hex.substring(4, 6), 16)
+    return (r * 299 + g * 587 + b * 114) / 1000 > 160
+  }
+  return false
+}
 
 function ArrowUpRight({ className = "" }: { className?: string }) {
   return (
@@ -198,28 +363,6 @@ function MonitorFrameIcon() {
   )
 }
 
-function GlassFrameIcon() {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      aria-hidden="true"
-    >
-      <rect
-        x="2.5"
-        y="3.5"
-        width="15"
-        height="13"
-        rx="3"
-        strokeDasharray="2 2"
-      />
-      <line x1="4.5" y1="7" x2="15.5" y2="7" />
-    </svg>
-  )
-}
-
 function NoneFrameIcon() {
   return (
     <svg
@@ -321,7 +464,6 @@ const frameOptions = [
     icon: MonitorFrameIcon,
     desc: "Studio Display",
   },
-  { id: "glass", label: "Glass", icon: GlassFrameIcon, desc: "Floating Glass" },
   { id: "none", label: "Frameless", icon: NoneFrameIcon, desc: "Edge-to-Edge" },
 ] as const
 
@@ -359,6 +501,7 @@ export function MockupCanvas({
   frameRatio,
   frameUrl,
   frameShadow,
+  frameBackground,
   onUploadClick,
 }: {
   mode: Mode
@@ -380,6 +523,7 @@ export function MockupCanvas({
   frameRatio: FrameRatio
   frameUrl: string
   frameShadow: FrameShadow
+  frameBackground: string
   onUploadClick?: () => void
 }) {
   const primaryImage = images[0]
@@ -453,70 +597,91 @@ export function MockupCanvas({
   })
 
   const renderContent = () => {
-    if (!primaryImage) {
+    if (mode === "split") {
+      const hasAnyImage = Boolean(primaryImage)
+      const isLight = isLightColor(frameBackground)
       return (
         <div
-          className="empty-canvas-content"
-          onClick={onUploadClick}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault()
-              onUploadClick?.()
-            }
+          className={`split-atlas-content ${isLight ? "is-light-bg" : ""}`}
+          style={{
+            background: frameBackground,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
-          title="Click to upload an image"
-          aria-label="Upload an image. Activate to choose a file."
         >
-          <div className="empty-icon-wrap" aria-hidden="true">
-            <UploadIcon />
-          </div>
-          <strong className="empty-title">Your image is the mockup.</strong>
-          <span className="empty-subtitle">Upload one image to begin.</span>
-          <span className="empty-upload-btn" aria-hidden="true">
-            Upload image
-          </span>
-        </div>
-      )
-    }
-
-    if (mode === "split") {
-      return (
-        <div className="split-atlas-content">
           <div className="atlas-pages">
-            {[primaryImage, secondaryImage].map((image, index) => (
-              <article
-                key={index}
-                className={`atlas-page ${
-                  activeSection === index ? "is-selected" : ""
-                }`}
-                style={{
-                  left: `${sections[index].x}%`,
-                  top: `${sections[index].y}%`,
-                  width: `${sections[index].width}%`,
-                  height: `${sections[index].height}%`,
-                  borderRadius: `${sectionRadius}px`,
-                }}
-                onPointerDown={() => onActiveSectionChange(index)}
-              >
-                <img
-                  loading="lazy"
-                  decoding="async"
-                  src={image}
-                  alt={`Uploaded website image, section ${index + 1}`}
-                  {...cropImageProps(
-                    index,
-                    index === 0 ? primaryFocus : secondaryFocus,
-                    index === 0 ? onPrimaryFocusChange : onSecondaryFocusChange,
-                  )}
-                />
-                <div className="red-wash" />
-              </article>
-            ))}
+            {[0, 1].map((index) => {
+              const image =
+                index === 0 ? primaryImage : secondaryImage || primaryImage
+              return (
+                <article
+                  key={index}
+                  className={`atlas-page ${
+                    activeSection === index ? "is-selected" : ""
+                  }`}
+                  style={{
+                    left: `${sections[index].x}%`,
+                    top: `${sections[index].y}%`,
+                    width: `${sections[index].width}%`,
+                    height: `${sections[index].height}%`,
+                    borderRadius: `${sectionRadius}px`,
+                    background: "transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                  }}
+                  onPointerDown={() => onActiveSectionChange(index)}
+                >
+                  {image ? (
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={image}
+                      alt={`Uploaded website image, section ${index + 1}`}
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                      {...cropImageProps(
+                        index,
+                        index === 0 ? primaryFocus : secondaryFocus,
+                        index === 0
+                          ? onPrimaryFocusChange
+                          : onSecondaryFocusChange,
+                      )}
+                    />
+                  ) : !hasAnyImage ? (
+                    <div
+                      className="empty-split-section"
+                      onClick={onUploadClick}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault()
+                          onUploadClick?.()
+                        }
+                      }}
+                      title="Click to upload an image"
+                    >
+                      <UploadIcon />
+                      <span>Section {index + 1}</span>
+                      <small style={{ fontSize: "10px", opacity: 0.7 }}>
+                        {Math.round(sections[index].width)}% width · Upload
+                      </small>
+                    </div>
+                  ) : null}
+                  <div className="red-wash" />
+                </article>
+              )
+            })}
           </div>
           <div
-            className={`atlas-divider ${draggingDivider ? "is-active" : ""}`}
+            className={`atlas-divider ${draggingDivider ? "is-active" : ""} ${
+              isLight ? "is-light-bg" : ""
+            }`}
             style={{ left: `${sections[0].x + sections[0].width}%` }}
             role="separator"
             tabIndex={0}
@@ -553,6 +718,34 @@ export function MockupCanvas({
               S1 · {Math.round(sections[0].width)}%
             </em>
           </div>
+        </div>
+      )
+    }
+
+    if (!primaryImage) {
+      return (
+        <div
+          className="empty-canvas-content"
+          onClick={onUploadClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              onUploadClick?.()
+            }
+          }}
+          title="Click to upload an image"
+          aria-label="Upload an image. Activate to choose a file."
+        >
+          <div className="empty-icon-wrap" aria-hidden="true">
+            <UploadIcon />
+          </div>
+          <strong className="empty-title">Your image is the mockup.</strong>
+          <span className="empty-subtitle">Upload one image to begin.</span>
+          <span className="empty-upload-btn" aria-hidden="true">
+            Upload image
+          </span>
         </div>
       )
     }
@@ -747,38 +940,6 @@ export function MockupCanvas({
           </div>
         )
 
-      case "glass":
-        return (
-          <div
-            className={`frame-shell frame-glass finish-${frameFinish}`}
-            style={{ borderRadius: `${sectionRadius}px` }}
-          >
-            <div className="glass-titlebar">
-              <div className="glass-dots">
-                <span className="glass-dot" />
-                <span className="glass-dot" />
-                <span className="glass-dot" />
-              </div>
-              <span className="glass-domain">
-                {frameUrl || "fitness-pro.app"}
-              </span>
-              <div className="glass-badge">GLAZED</div>
-            </div>
-            <div
-              className="frame-viewport-screen glass-screen"
-              style={{
-                borderBottomLeftRadius: `${sectionRadius}px`,
-                borderBottomRightRadius: `${sectionRadius}px`,
-              }}
-            >
-              {content}
-              {frameGlare && (
-                <div className="frame-glare-overlay" aria-hidden="true" />
-              )}
-            </div>
-          </div>
-        )
-
       case "none":
       default:
         return (
@@ -803,7 +964,7 @@ export function MockupCanvas({
   const defaultCanvasBg = darkTheme ? "#18181c" : "#f9fafb"
   const effectiveBg =
     canvasBackground === "#111111"
-      ? primaryImage
+      ? primaryImage || mode === "split"
         ? "#111111"
         : defaultCanvasBg
       : canvasBackground
@@ -814,9 +975,14 @@ export function MockupCanvas({
       ref={canvasRef}
       tabIndex={-1}
       className={`mockup-canvas frame-mode-${frameType} finish-${frameFinish} ratio-${frameRatio} shadow-${frameShadow} ${
-        !primaryImage ? "is-empty" : ""
+        !primaryImage && mode !== "split" ? "is-empty" : ""
       }`}
-      style={{ background: effectiveBg }}
+      style={
+        {
+          background: effectiveBg,
+          "--frame-bg": frameBackground,
+        } as React.CSSProperties
+      }
       onPointerMove={(event) => {
         moveDivider(event)
         moveCrop(event)
@@ -1109,14 +1275,13 @@ export default function App() {
   const [frameUrl, setFrameUrl] = useState("fitness-pro.io")
   const [frameShadow, setFrameShadow] = useState<FrameShadow>("deep")
 
+  // Frame interior background state
+  const [frameBackground, setFrameBackground] = useState("#000000")
+
   const inputRef = useRef<HTMLInputElement>(null)
   const backgroundInputRef = useRef<HTMLInputElement>(null)
+  const frameBgInputRef = useRef<HTMLInputElement>(null)
   const imagesRef = useRef<string[]>([])
-
-  useEffect(() => {
-    if (images.length >= 2) setMode("split")
-    else if (images.length === 1) setMode("single")
-  }, [images.length])
 
   useEffect(() => {
     imagesRef.current = images
@@ -1130,12 +1295,25 @@ export default function App() {
     [],
   )
 
+  const handleFrameBgImage = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file || !file.type.startsWith("image/")) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      setFrameBackground(
+        `url(${reader.result as string}) center / cover no-repeat`,
+      )
+    }
+    reader.readAsDataURL(file)
+    event.target.value = ""
+  }
+
   const addFiles = (files: FileList | File[]) => {
     const file = Array.from(files).find((item) =>
       item.type.startsWith("image/"),
     )
     if (!file) return
-    setImages((old) => (old.length < 1 ? [URL.createObjectURL(file)] : old))
+    setImages([URL.createObjectURL(file)])
   }
 
   const handleFiles = (event: ChangeEvent<HTMLInputElement>) => {
@@ -1189,8 +1367,10 @@ export default function App() {
     updateSection(activeSection, { ...selectedLayout, [property]: value })
   }
 
+  const canExport = Boolean(images[0]) || mode === "split"
+
   const exportCanvas = async () => {
-    if (!images[0]) return
+    if (!canExport) return
     const node = document.getElementById("mockup-canvas")
     if (!node) return
     setExporting(true)
@@ -1480,7 +1660,7 @@ export default function App() {
               </div>
             </div>
 
-            {(frameType === "browser" || frameType === "glass") && (
+            {frameType === "browser" && (
               <div className="frame-url-control">
                 <label>
                   <span>Header URL</span>
@@ -1554,6 +1734,79 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            {/* Frame Background Control */}
+            <div className="frame-subcontrol">
+              <div className="subcontrol-head">
+                <span>Frame background</span>
+                <b>{isLightColor(frameBackground) ? "Light" : "Dark"}</b>
+              </div>
+              <div className="background-controls">
+                <label className="color-control">
+                  <span>Frame custom color</span>
+                  <input
+                    type="color"
+                    value={
+                      frameBackground.startsWith("#")
+                        ? frameBackground
+                        : "#000000"
+                    }
+                    onChange={(event) => setFrameBackground(event.target.value)}
+                  />
+                </label>
+                <div
+                  className="gradient-options"
+                  role="group"
+                  aria-label="Frame background presets"
+                >
+                  {frameBgPresets.map(([name, label, value]) => (
+                    <button
+                      key={name}
+                      type="button"
+                      aria-label={`Frame background: ${label}`}
+                      aria-pressed={frameBackground === value}
+                      className={`background-swatch ${name} ${
+                        frameBackground === value ? "is-selected-swatch" : ""
+                      }`}
+                      onClick={() => setFrameBackground(value)}
+                      style={
+                        value.startsWith("url")
+                          ? { backgroundImage: value }
+                          : {}
+                      }
+                    />
+                  ))}
+                </div>
+                <div className="split-bg-actions-row">
+                  <button
+                    type="button"
+                    className="background-upload split-upload-btn"
+                    onClick={() => frameBgInputRef.current?.click()}
+                  >
+                    Upload frame BG
+                  </button>
+                  <button
+                    type="button"
+                    className="split-match-btn"
+                    onClick={() => setFrameBackground(canvasBackground)}
+                    title="Match frame background to canvas background"
+                  >
+                    Match canvas
+                  </button>
+                </div>
+                <label className="sr-only" htmlFor="mockforge-frame-bg-upload">
+                  Upload a custom frame background image
+                </label>
+                <input
+                  ref={frameBgInputRef}
+                  id="mockforge-frame-bg-upload"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={handleFrameBgImage}
+                />
+              </div>
+            </div>
           </section>
 
           {/* Canvas Background Section */}
@@ -1583,85 +1836,15 @@ export default function App() {
                 role="group"
                 aria-label="Canvas background presets"
               >
-                {[
-                  ["solid", "Black background", "#111111"],
-                  [
-                    "ember",
-                    "Red glow gradient",
-                    "radial-gradient(circle at 80% 15%, #8d251f 0%, #1c1010 42%, #111111 100%)",
-                  ],
-                  [
-                    "violet",
-                    "Violet gradient",
-                    "linear-gradient(135deg, #111111 0%, #272041 52%, #6b275c 100%)",
-                  ],
-                  [
-                    "sunset",
-                    "Sunset gradient",
-                    "linear-gradient(135deg, #16100f 0%, #803326 52%, #e2a74b 100%)",
-                  ],
-                  [
-                    "ocean",
-                    "Ocean gradient",
-                    "linear-gradient(145deg, #061521 0%, #126e82 52%, #8ce3e0 100%)",
-                  ],
-                  [
-                    "cobalt",
-                    "Cobalt gradient",
-                    "linear-gradient(135deg, #09163a 0%, #2355d9 55%, #8fb3ff 100%)",
-                  ],
-                  [
-                    "orchid",
-                    "Orchid gradient",
-                    "linear-gradient(135deg, #25102e 0%, #9b3ca5 50%, #f7a6cb 100%)",
-                  ],
-                  [
-                    "forest",
-                    "Forest gradient",
-                    "linear-gradient(135deg, #071c16 0%, #25765f 55%, #a8d98c 100%)",
-                  ],
-                  [
-                    "sand",
-                    "Sand gradient",
-                    "linear-gradient(135deg, #2c2016 0%, #b77a45 55%, #f5ddb0 100%)",
-                  ],
-                  [
-                    "rose",
-                    "Rose gradient",
-                    "linear-gradient(135deg, #2b1016 0%, #c23d67 50%, #ffc0bd 100%)",
-                  ],
-                  [
-                    "slate",
-                    "Slate gradient",
-                    "linear-gradient(135deg, #111827 0%, #485569 52%, #d7dee6 100%)",
-                  ],
-                  [
-                    "lime",
-                    "Lime gradient",
-                    "linear-gradient(135deg, #111809 0%, #6e9833 52%, #e2ff7b 100%)",
-                  ],
-                  [
-                    "studio-3d",
-                    "Studio 3D backdrop",
-                    `url(${studioMonitorFrame}) center / cover no-repeat`,
-                  ],
-                  [
-                    "mobile-3d",
-                    "Mobile 3D backdrop",
-                    `url(${mobileTallFrame}) center / cover no-repeat`,
-                  ],
-                  [
-                    "laptop-3d",
-                    "Laptop 3D backdrop",
-                    `url(${laptopProFrame}) center / cover no-repeat`,
-                  ],
-                ].map(([name, label, value]) => (
+                {backgroundPresets.map(([name, label, value]) => (
                   <button
                     key={name}
                     type="button"
                     aria-label={`Canvas background: ${label}`}
                     aria-pressed={canvasBackground === value}
-                    className={`background-swatch ${name}`}
+                    className={`background-swatch ${name} ${
+                      canvasBackground === value ? "is-selected-swatch" : ""
+                    }`}
                     onClick={() => setCanvasBackground(value)}
                     style={
                       value.startsWith("url") ? { backgroundImage: value } : {}
@@ -1691,7 +1874,7 @@ export default function App() {
           </section>
 
           {/* Split Inspector Section */}
-          {mode === "split" && images[0] && (
+          {mode === "split" && (
             <section
               className="tool-section split-inspector"
               aria-label="Split section inspector"
@@ -1718,6 +1901,7 @@ export default function App() {
                   Section 2
                 </button>
               </div>
+
               <div className="dimension-controls">
                 {([
                   ["width", "Horizontal size", 25, 100],
@@ -1792,12 +1976,12 @@ export default function App() {
             type="button"
             className="export-button"
             onClick={exportCanvas}
-            disabled={exporting || !images[0]}
-            aria-disabled={exporting || !images[0]}
+            disabled={exporting || !canExport}
+            aria-disabled={exporting || !canExport}
             title={
-              images[0]
+              canExport
                 ? "Export the preview as PNG"
-                : "Upload an image to enable export"
+                : "Upload an image or switch to split mode to enable export"
             }
           >
             {exporting ? "Rendering..." : "Export PNG"} <ArrowUpRight />
@@ -1805,7 +1989,7 @@ export default function App() {
           <p className="sr-only" role="status" aria-live="polite">
             {exporting
               ? "Rendering PNG export."
-              : images[0]
+              : canExport
                 ? "Preview ready. Export is available."
                 : "Upload one image to begin. Export is disabled."}
           </p>
@@ -1835,6 +2019,7 @@ export default function App() {
             frameRatio={frameRatio}
             frameUrl={frameUrl}
             frameShadow={frameShadow}
+            frameBackground={frameBackground}
             onUploadClick={() => inputRef.current?.click()}
           />
           <div className="frame-corner top left" />
