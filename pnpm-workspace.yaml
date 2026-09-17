@@ -1,0 +1,3 @@
+# Delay new releases by seven days and reject weaker package trust signals.
+minimumReleaseAge: 10080
+trustPolicy: no-downgrade

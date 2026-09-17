@@ -113,14 +113,34 @@
 ├── tsconfig.json           # TypeScript configuration
 ├── vite.config.ts          # Vite configuration with React & Tailwind CSS v4
 ├── src/
-│   ├── App.tsx             # Main MockForge application & canvas logic
+│   ├── App.tsx             # Composition root (thin: wires state + layout)
 │   ├── main.tsx            # React application entrypoint
 │   ├── index.css           # Global CSS, theme tokens, and frame architectures
+│   ├── types.ts            # Domain types for the editable mockup document
+│   ├── services/           # Framework-free logic: reducer, layout maths,
+│   │                       #   drag geometry, export pipeline, uploads, presets
+│   ├── hooks/              # React adapters: useMockupState, useRafThrottle,
+│   │                       #   useDividerDrag, useCropDrag
+│   ├── components/         # MockupCanvas, FrameShell, MockupContent, icons,
+│   │   │                   #   ControlPanel, FloatingSuggestionBox
+│   │   ├── sections/       # One file per control-panel section
+│   │   └── ui/             # Shared panel primitives (RangeInput, swatches)
 │   └── Frame/              # 3D studio backdrop assets
 │       ├── laptop_pro_frame.jpg
 │       ├── mobile_tall_frame.jpg
 │       └── studio_monitor_frame.jpg
 ```
+
+### Architecture notes
+
+- **State**: one reducer (`src/services/mockupState.ts`) driven by `useMockupState()`. Components never call `setState` for document state; they call named `actions`.
+- **Performance**: every panel section and the canvas are `memo`ized and receive stable state slices, so dragging the divider or crop handle only re-renders the canvas. Pointer moves are coalesced to one update per animation frame.
+- **Purity**: geometry, clamping and defaults live in `src/services` as pure functions, which keeps them testable without React or a DOM.
+
+### ⚠️ Formatting caveat
+
+`pnpm run format` uses oxfmt 0.2.0, which is **lossy**: it removes the separator inside single-line type/object literals (`{ x: number; y: number }` → `{ x: number y: number }`), turning valid TypeScript into invalid TypeScript. Do not run it until the formatter is fixed or configured otherwise.
+
 
 ---
 
