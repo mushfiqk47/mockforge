@@ -1,7 +1,3 @@
-import studioMinimalPodium from "../Frame/studio_minimal_podium.jpg"
-import studioDarkCyberGlow from "../Frame/studio_dark_cyber_glow.jpg"
-import studioAbstractSilk from "../Frame/studio_abstract_silk.jpg"
-
 /** A background preset: [css-class-suffix, human label, css background value]. */
 export type BackgroundPreset = [name: string, label: string, value: string]
 
@@ -64,21 +60,6 @@ export const backgroundPresets: BackgroundPreset[] = [
     "lime",
     "Lime gradient",
     "linear-gradient(135deg, #111809 0%, #6e9833 52%, #e2ff7b 100%)",
-  ],
-  [
-    "studio-podium",
-    "Studio Podium backdrop",
-    `url(${studioMinimalPodium}) center / cover no-repeat`,
-  ],
-  [
-    "cyber-glow",
-    "Cyber Glow backdrop",
-    `url(${studioDarkCyberGlow}) center / cover no-repeat`,
-  ],
-  [
-    "abstract-silk",
-    "Abstract Silk backdrop",
-    `url(${studioAbstractSilk}) center / cover no-repeat`,
   ],
 ]
 
