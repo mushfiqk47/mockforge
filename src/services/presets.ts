@@ -67,7 +67,6 @@ export const backgroundPresets: BackgroundPreset[] = [
 export const frameBgPresets: BackgroundPreset[] = [
   ["white", "Pure White", "#ffffff"],
   ["solid", "Pure Black", "#000000"],
-  ["light-gray", "Light Gray", "#f3f4f6"],
   ["zinc", "Dark Zinc", "#18181b"],
   [
     "ember",
