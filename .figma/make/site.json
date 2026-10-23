@@ -1,8 +1,8 @@
 {
   "title": "MockForge",
-  "description": "Create realistic dark-themed fitness website mockups by uploading images and customizing text with instant previews and easy PNG export.",
+  "description": "Transform your screenshots into photorealistic 3D studio device mockups in seconds with custom frames, split views, and 4K PNG export.",
   "robots": {
-    "index": false
+    "index": true
   },
   "accessibility": {
     "addBypassLinks": false,

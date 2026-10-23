@@ -1,5 +1,11 @@
 import type { BackgroundPreset } from "../../services/presets"
 
+function extractUrl(value: string): string | null {
+  if (!value.startsWith("url(")) return null
+  const match = value.match(/url\(['"]?([^'"]+?)['"]?\)/)
+  return match ? match[1] : null
+}
+
 /**
  * Swatch grid for background presets.
  *
@@ -23,6 +29,8 @@ export function BackgroundSwatches({
     <div className="gradient-options" role="group" aria-label={groupLabel}>
       {presets.map(([name, label, value]) => {
         const isSelected = selected === value
+        const imageUrl = extractUrl(value)
+
         return (
           <button
             key={name}
@@ -33,8 +41,27 @@ export function BackgroundSwatches({
               isSelected ? "is-selected-swatch" : ""
             }`}
             onClick={() => onSelect(value)}
-            style={value.startsWith("url") ? { backgroundImage: value } : {}}
-          />
+            style={
+              imageUrl
+                ? {
+                    backgroundImage: `url("${imageUrl}")`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }
+                : { background: value }
+            }
+          >
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt={label}
+                className="swatch-thumbnail-img"
+                loading="lazy"
+                decoding="async"
+              />
+            )}
+          </button>
         )
       })}
     </div>

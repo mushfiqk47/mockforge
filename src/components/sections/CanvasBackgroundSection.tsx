@@ -3,7 +3,6 @@ import type { ChangeEvent } from "react"
 import {
   CANVAS_BACKGROUND_INPUT_ID,
   IMAGE_UPLOAD_ACCEPT,
-  NEUTRAL_CANVAS_BACKGROUND,
 } from "../../services/constants"
 import { backgroundPresets } from "../../services/presets"
 import { isImageFile, loadBackgroundImage } from "../../services/uploads"
@@ -37,21 +36,8 @@ export const CanvasBackgroundSection = memo(function CanvasBackgroundSection({
     >
       <div className="section-head">
         <span>Canvas background</span>
-        <span>LIVE</span>
       </div>
       <div className="background-controls">
-        <label className="color-control">
-          <span>Custom color</span>
-          <input
-            type="color"
-            value={
-              background.startsWith("#") ? background : NEUTRAL_CANVAS_BACKGROUND
-            }
-            onChange={(event) =>
-              onAppearanceChange({ canvasBackground: event.target.value })
-            }
-          />
-        </label>
         <BackgroundSwatches
           presets={backgroundPresets}
           selected={background}

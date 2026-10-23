@@ -1,6 +1,6 @@
-import studioMonitorFrame from "../Frame/studio_monitor_frame.jpg"
-import mobileTallFrame from "../Frame/mobile_tall_frame.jpg"
-import laptopProFrame from "../Frame/laptop_pro_frame.jpg"
+import studioMinimalPodium from "../Frame/studio_minimal_podium.jpg"
+import studioDarkCyberGlow from "../Frame/studio_dark_cyber_glow.jpg"
+import studioAbstractSilk from "../Frame/studio_abstract_silk.jpg"
 
 /** A background preset: [css-class-suffix, human label, css background value]. */
 export type BackgroundPreset = [name: string, label: string, value: string]
@@ -66,19 +66,19 @@ export const backgroundPresets: BackgroundPreset[] = [
     "linear-gradient(135deg, #111809 0%, #6e9833 52%, #e2ff7b 100%)",
   ],
   [
-    "studio-3d",
-    "Studio 3D backdrop",
-    `url(${studioMonitorFrame}) center / cover no-repeat`,
+    "studio-podium",
+    "Studio Podium backdrop",
+    `url(${studioMinimalPodium}) center / cover no-repeat`,
   ],
   [
-    "mobile-3d",
-    "Mobile 3D backdrop",
-    `url(${mobileTallFrame}) center / cover no-repeat`,
+    "cyber-glow",
+    "Cyber Glow backdrop",
+    `url(${studioDarkCyberGlow}) center / cover no-repeat`,
   ],
   [
-    "laptop-3d",
-    "Laptop 3D backdrop",
-    `url(${laptopProFrame}) center / cover no-repeat`,
+    "abstract-silk",
+    "Abstract Silk backdrop",
+    `url(${studioAbstractSilk}) center / cover no-repeat`,
   ],
 ]
 

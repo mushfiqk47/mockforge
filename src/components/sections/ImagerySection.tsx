@@ -1,6 +1,7 @@
 import { memo, useCallback, useState } from "react"
 import type { ChangeEvent, DragEvent, RefObject } from "react"
 import { IMAGE_INPUT_ID, IMAGE_UPLOAD_ACCEPT } from "../../services/constants"
+import { validateImageFile } from "../../services/uploads"
 import { UploadIcon } from "../icons"
 
 /**
@@ -20,10 +21,20 @@ export const ImagerySection = memo(function ImagerySection({
   onRemoveImage: (index: number) => void
 }) {
   const [isDragging, setIsDragging] = useState(false)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   const handleFiles = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      if (event.target.files) onImagesSelected(event.target.files)
+      const file = event.target.files?.[0]
+      if (file) {
+        const check = validateImageFile(file)
+        if (!check.valid) {
+          setValidationError(check.error ?? "Invalid image file.")
+        } else {
+          setValidationError(null)
+          onImagesSelected(event.target.files!)
+        }
+      }
       event.target.value = ""
     },
     [onImagesSelected],
@@ -33,7 +44,16 @@ export const ImagerySection = memo(function ImagerySection({
     (event: DragEvent<HTMLButtonElement>) => {
       event.preventDefault()
       setIsDragging(false)
-      if (event.dataTransfer.files) onImagesSelected(event.dataTransfer.files)
+      const file = event.dataTransfer.files?.[0]
+      if (file) {
+        const check = validateImageFile(file)
+        if (!check.valid) {
+          setValidationError(check.error ?? "Invalid image file.")
+        } else {
+          setValidationError(null)
+          onImagesSelected(event.dataTransfer.files)
+        }
+      }
     },
     [onImagesSelected],
   )
@@ -60,6 +80,11 @@ export const ImagerySection = memo(function ImagerySection({
           <strong>Upload one image</strong>
           <small>JPG, PNG or WEBP · 10MB max</small>
         </button>
+      )}
+      {validationError && (
+        <p className="upload-error-note" role="alert">
+          {validationError}
+        </p>
       )}
       <label className="sr-only" htmlFor={IMAGE_INPUT_ID}>
         Upload a website screenshot (JPG, PNG or WEBP, 10MB max)

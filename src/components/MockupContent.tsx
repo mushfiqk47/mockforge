@@ -132,7 +132,7 @@ export const MockupContent = memo(function MockupContent({
                     <span>Section {index + 1}</span>
                     <small
                       style={{
-                        fontSize: "10px",
+                        fontSize: "11px",
                         opacity: 0.7,
                       }}
                     >

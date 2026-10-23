@@ -12,7 +12,6 @@ export const FormatSection = memo(function FormatSection({
     <section className="tool-section" aria-label="Format">
       <div className="section-head">
         <span>Format</span>
-        <span>LIVE</span>
       </div>
       <div className="mode-toggle">
         <button

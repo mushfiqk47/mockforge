@@ -45,7 +45,7 @@ export default function App() {
         imageInputRef={imageInputRef}
       />
 
-      <section className="stage stage-ember" aria-label="Mockup preview">
+      <section className="stage" aria-label="Mockup preview">
         <div className="stage-frame">
           <MockupCanvas
             mode={state.mode}
