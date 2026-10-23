@@ -12,8 +12,8 @@ import {
  * "skip to preview" focus target, and the PNG export pipeline.
  *
  * The export is one call from the caller's point of view; behind it the module
- * inlines every photo, captures the DOM, downloads the file and always
- * restores the page to its original state.
+ * inlines photos, captures the DOM, downloads the file and guarantees the page
+ * is restored to its original state.
  */
 
 export function getMockupCanvasElement(): HTMLElement | null {
@@ -58,7 +58,7 @@ async function inlineCanvasImages(node: HTMLElement): Promise<() => void> {
       try {
         await image.decode()
       } catch {
-        // Keep the inlined source even if decode reporting is unsupported.
+        // Keep inlined source if decode reporting is unsupported in environment.
       }
     }),
   )
@@ -82,26 +82,38 @@ export type ExportResult = {
   error?: unknown
 }
 
+let isExportRunning = false
+
 export async function exportMockupPng(frameType: FrameType): Promise<ExportResult> {
+  if (isExportRunning) return { ok: false, error: new Error("Export already in progress") }
   const node = getMockupCanvasElement()
   if (!node) return { ok: false }
 
+  isExportRunning = true
   const { toPng } = await loadHtmlToImage()
   let restoreImages: (() => void) | null = null
   node.classList.add("is-exporting")
 
   try {
     restoreImages = await inlineCanvasImages(node)
-    // Measure after the export-only styles are applied, so the capture matches
-    // the node exactly as it will be rendered.
+    // Measure after export styles are applied so capture matches rendered size.
     const rect = node.getBoundingClientRect()
     if (!rect.width || !rect.height) return { ok: false }
 
+    // Clamp export resolution to device/browser canvas limits (prevents iOS OOM crashes).
+    const maxCanvasDimension = 4096
+    const desiredRatio = Math.max(
+      EXPORT_MIN_PIXEL_RATIO,
+      Math.min(EXPORT_MAX_PIXEL_RATIO, EXPORT_TARGET_WIDTH / rect.width),
+    )
+    const maxSafeRatio = Math.min(
+      maxCanvasDimension / rect.width,
+      maxCanvasDimension / rect.height,
+    )
+    const pixelRatio = Math.max(1, Math.min(desiredRatio, maxSafeRatio))
+
     const dataUrl = await toPng(node, {
-      pixelRatio: Math.max(
-        EXPORT_MIN_PIXEL_RATIO,
-        Math.min(EXPORT_MAX_PIXEL_RATIO, EXPORT_TARGET_WIDTH / rect.width),
-      ),
+      pixelRatio,
       cacheBust: false,
       skipFonts: true,
       backgroundColor: EXPORT_BACKGROUND,
@@ -115,7 +127,11 @@ export async function exportMockupPng(frameType: FrameType): Promise<ExportResul
     console.error("Export failed", error)
     return { ok: false, error }
   } finally {
-    restoreImages?.()
-    node.classList.remove("is-exporting")
+    try {
+      restoreImages?.()
+    } finally {
+      node.classList.remove("is-exporting")
+      isExportRunning = false
+    }
   }
 }

@@ -11,6 +11,7 @@ export const IMAGE_INPUT_ID = "mockforge-upload"
 export const FRAME_BACKGROUND_INPUT_ID = "mockforge-frame-bg-upload"
 export const CANVAS_BACKGROUND_INPUT_ID = "mockforge-background-upload"
 export const IMAGE_UPLOAD_ACCEPT = "image/*"
+export const MAX_IMAGE_FILE_SIZE_BYTES = 10 * 1024 * 1024
 
 /** Gap between the two hero sections in split mode, in canvas percent. */
 export const SPLIT_GAP = 2

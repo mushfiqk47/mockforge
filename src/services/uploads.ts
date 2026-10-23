@@ -1,3 +1,5 @@
+import { MAX_IMAGE_FILE_SIZE_BYTES } from "./constants"
+
 /**
  * Image file helpers shared by every upload control.
  *
@@ -9,12 +11,30 @@ export function isImageFile(file: File | null | undefined): file is File {
   return Boolean(file && file.type.startsWith("image/"))
 }
 
-/** First image out of a drop or picker selection, or null when there is none. */
+export function isFileSizeAcceptable(file: File | null | undefined): boolean {
+  return Boolean(file && file.size <= MAX_IMAGE_FILE_SIZE_BYTES)
+}
+
+export function validateImageFile(file: File | null | undefined): {
+  valid: boolean
+  error?: string
+} {
+  if (!file) return { valid: false, error: "No file selected." }
+  if (!isImageFile(file)) {
+    return { valid: false, error: "Please upload a valid image file (JPG, PNG, or WEBP)." }
+  }
+  if (!isFileSizeAcceptable(file)) {
+    return { valid: false, error: "Image file exceeds the 10MB limit." }
+  }
+  return { valid: true }
+}
+
+/** First valid image out of a drop or picker selection, or null when there is none. */
 export function firstImageFile(
   files: FileList | File[] | null | undefined,
 ): File | null {
   if (!files) return null
-  return Array.from(files).find(isImageFile) ?? null
+  return Array.from(files).find((file) => isImageFile(file) && isFileSizeAcceptable(file)) ?? null
 }
 
 export function createImageObjectUrl(file: File): string {
@@ -49,9 +69,10 @@ export function toBackgroundImageValue(dataUrl: string): string {
 
 /**
  * Read an uploaded file into a ready-to-apply CSS background value.
- * Returns null when the file could not be read.
+ * Returns null when the file could not be read or exceeds the maximum size.
  */
 export async function loadBackgroundImage(file: File): Promise<string | null> {
+  if (!isImageFile(file) || !isFileSizeAcceptable(file)) return null
   try {
     return toBackgroundImageValue(await readFileAsDataUrl(file))
   } catch {

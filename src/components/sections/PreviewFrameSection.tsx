@@ -1,6 +1,5 @@
 import { memo, useCallback, useRef } from "react"
 import type { ChangeEvent, ReactElement } from "react"
-import { isLightColor } from "../../services/color"
 import {
   FRAME_BACKGROUND_INPUT_ID,
   IMAGE_UPLOAD_ACCEPT,
@@ -80,7 +79,7 @@ export const PreviewFrameSection = memo(function PreviewFrameSection({
     >
       <div className="section-head">
         <span>Preview frame</span>
-        <span>{frame.type.toUpperCase()}</span>
+        <span>{frame.type === "none" ? "FRAMELESS" : frame.type.toUpperCase()}</span>
       </div>
 
       {/* Frame Model Grid */}
@@ -91,9 +90,8 @@ export const PreviewFrameSection = memo(function PreviewFrameSection({
             <button
               key={id}
               type="button"
-              className={`frame-option-card ${
-                frame.type === id ? "is-active" : ""
-              }`}
+              className={`frame-option-card ${frame.type === id ? "is-active" : ""
+                }`}
               onClick={() => onFrameChange({ type: id })}
               aria-pressed={frame.type === id}
               title={desc}
@@ -135,7 +133,7 @@ export const PreviewFrameSection = memo(function PreviewFrameSection({
             title="Toggle 3D Screen Glass Sheen Reflection"
           >
             <span className="glare-star">✦</span>
-            {frame.glare ? "Glare on" : "No glare"}
+            Glare on
           </button>
         </div>
       </div>
@@ -198,9 +196,8 @@ export const PreviewFrameSection = memo(function PreviewFrameSection({
               <button
                 key={radius}
                 type="button"
-                className={`radius-preset-chip ${
-                  sectionRadius === radius ? "is-active" : ""
-                }`}
+                className={`radius-preset-chip ${sectionRadius === radius ? "is-active" : ""
+                  }`}
                 onClick={() => onAppearanceChange({ sectionRadius: radius })}
                 aria-pressed={sectionRadius === radius}
               >
@@ -221,9 +218,8 @@ export const PreviewFrameSection = memo(function PreviewFrameSection({
             <button
               key={shadow}
               type="button"
-              className={`ratio-chip ${
-                frame.shadow === shadow ? "is-active" : ""
-              }`}
+              className={`ratio-chip ${frame.shadow === shadow ? "is-active" : ""
+                }`}
               onClick={() => onFrameChange({ shadow })}
               aria-pressed={frame.shadow === shadow}
             >
@@ -237,19 +233,8 @@ export const PreviewFrameSection = memo(function PreviewFrameSection({
       <div className="frame-subcontrol">
         <div className="subcontrol-head">
           <span>Frame background</span>
-          <b>{isLightColor(frame.background) ? "Light" : "Dark"}</b>
         </div>
         <div className="background-controls">
-          <label className="color-control">
-            <span>Frame custom color</span>
-            <input
-              type="color"
-              value={frame.background.startsWith("#") ? frame.background : "#000000"}
-              onChange={(event) =>
-                onFrameChange({ background: event.target.value })
-              }
-            />
-          </label>
           <BackgroundSwatches
             presets={frameBgPresets}
             selected={frame.background}
@@ -260,7 +245,7 @@ export const PreviewFrameSection = memo(function PreviewFrameSection({
           <div className="split-bg-actions-row">
             <button
               type="button"
-              className="background-upload split-upload-btn"
+              className="split-upload-btn"
               onClick={() => frameBgInputRef.current?.click()}
             >
               Upload frame BG

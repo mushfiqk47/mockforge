@@ -15,12 +15,19 @@ export const ExportFooter = memo(function ExportFooter({
   frameType: FrameType
 }) {
   const [isExporting, setIsExporting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleExport = useCallback(async () => {
     if (!canExport || isExporting) return
     setIsExporting(true)
+    setErrorMessage(null)
     try {
-      await exportMockupPng(frameType)
+      const result = await exportMockupPng(frameType)
+      if (!result.ok) {
+        setErrorMessage("Export failed. Please verify the preview and try again.")
+      }
+    } catch {
+      setErrorMessage("Export encountered an unexpected error.")
     } finally {
       setIsExporting(false)
     }
@@ -30,6 +37,11 @@ export const ExportFooter = memo(function ExportFooter({
 
   return (
     <footer className="control-panel-footer">
+      {errorMessage && (
+        <p className="export-error-note" role="alert">
+          {errorMessage}
+        </p>
+      )}
       <button
         type="button"
         className="export-button"
@@ -47,9 +59,11 @@ export const ExportFooter = memo(function ExportFooter({
       <p className="sr-only" role="status" aria-live="polite">
         {isExporting
           ? "Rendering PNG export."
-          : canExport
-            ? "Preview ready. Export is available."
-            : "Upload one image to begin. Export is disabled."}
+          : errorMessage
+            ? errorMessage
+            : canExport
+              ? "Preview ready. Export is available."
+              : "Upload one image to begin. Export is disabled."}
       </p>
     </footer>
   )

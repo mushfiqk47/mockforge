@@ -30,7 +30,7 @@
 - **Midnight**: Deep navy blue metallic housing with luminous sky blue accents.
 
 ### ✨ Realistic Glass Glare Sheen
-- Toggleable 42° diagonal specular screen reflection (`✦ Glare on / No glare`) with `pointer-events: none` ensuring that pan-and-crop and divider interactions remain 100% responsive.
+- Toggleable 42° diagonal specular screen reflection (`✦ Glare  /  glare`) with `pointer-events: none` ensuring that pan-and-crop and divider interactions remain 100% responsive.
 
 ### 🎚️ Format & Hero Modes
 - **Single Hero**: Solo mockup layout with interactive pan-and-crop pointer capture.

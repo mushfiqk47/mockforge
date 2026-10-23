@@ -49,5 +49,6 @@ export function finishLabel(finish: FrameFinish): string {
 
 /** Human readable ratio, e.g. "Tall / 9:16" for the tall preset. */
 export function ratioLabel(ratio: FrameRatio): string {
-  return ratio === "9-16" ? "Tall / 9:16" : ratio.toUpperCase()
+  if (ratio === "auto") return "AUTO"
+  return ratio.replace("-", ":")
 }

@@ -25,7 +25,7 @@ export const ControlPanel = memo(function ControlPanel({
   actions: MockupActions
   imageInputRef: RefObject<HTMLInputElement | null>
 }) {
-  const { mode, images, sections, activeSection, appearance, frame } = state
+  const { mode, images, appearance, frame } = state
   const canExport = Boolean(images[0]) || mode === "split"
 
   return (
@@ -45,6 +45,17 @@ export const ControlPanel = memo(function ControlPanel({
 
         <FormatSection mode={mode} onModeChange={actions.setMode} />
 
+        {mode === "split" && (
+          <SplitInspectorSection
+            sections={state.sections}
+            activeSection={state.activeSection}
+            sectionRadius={appearance.sectionRadius}
+            onSelectSection={actions.selectSection}
+            onResizeSection={actions.resizeSection}
+            onAppearanceChange={actions.updateAppearance}
+          />
+        )}
+
         <PreviewFrameSection
           frame={frame}
           canvasBackground={appearance.canvasBackground}
@@ -57,17 +68,6 @@ export const ControlPanel = memo(function ControlPanel({
           background={appearance.canvasBackground}
           onAppearanceChange={actions.updateAppearance}
         />
-
-        {mode === "split" && (
-          <SplitInspectorSection
-            sections={sections}
-            activeSection={activeSection}
-            sectionRadius={appearance.sectionRadius}
-            onSelectSection={actions.selectSection}
-            onResizeSection={actions.resizeSection}
-            onAppearanceChange={actions.updateAppearance}
-          />
-        )}
       </div>
 
       <ExportFooter canExport={canExport} frameType={frame.type} />
