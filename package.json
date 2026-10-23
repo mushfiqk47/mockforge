@@ -10,7 +10,6 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run",
     "format": "oxfmt src vite.config.ts"
   },
   "dependencies": {
@@ -29,7 +28,6 @@
     "react-doctor": "^0.9.14",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
-    "vite": "^8.0.5",
-    "vitest": "^5.0.5"
+    "vite": "^8.0.5"
   }
 }
