@@ -88,7 +88,7 @@ This is the canonical project structure. Start with task-relevant files below. O
 - `src/services/` - Framework-free logic and data. Start here for behaviour changes: `mockupState.ts` (state shape + pure reducer), `layout.ts` (split geometry and clamping), `drag.ts` (pointer maths), `mockupCanvas.ts` (canvas DOM lookup, preview focus, PNG export pipeline), `uploads.ts` (file reading and blob URL lifetime), `presets.ts` (background presets), `frames.ts` (frame metadata), `constants.ts` (ids, limits, defaults), `color.ts` (contrast helper)
 - `src/hooks/` - React adapters over the services: `useMockupState.ts` (reducer + stable actions), `useRafThrottle.ts` (one update per animation frame), `useDividerDrag.ts`, `useCropDrag.ts`
 - `src/components/` - Preview surface and shell: `MockupCanvas.tsx`, `FrameShell.tsx` (device chrome), `MockupContent.tsx` (split/single/empty hero), `ControlPanel.tsx`, `FloatingSuggestionBox.tsx`, `icons.tsx`
-- `src/components/sections/` - One file per control-panel section: `ImagerySection.tsx`, `FormatSection.tsx`, `PreviewFrameSection.tsx`, `CanvasBackgroundSection.tsx`, `SplitInspectorSection.tsx`, `BrandHeader.tsx`, `ExportFooter.tsx`
+- `src/components/sections/` - One file per control-panel section: `ImagerySection.tsx`, `FormatSection.tsx`, `PreviewFrameSection.tsx`, `CanvasBackgroundSection.tsx`, `BrandHeader.tsx`, `ExportFooter.tsx`
 - `src/components/ui/` - Shared panel primitives: `RangeInput.tsx`, `BackgroundSwatches.tsx`
 - `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
 - `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.tsx`

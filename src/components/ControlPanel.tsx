@@ -8,7 +8,6 @@ import { ExportFooter } from "./sections/ExportFooter"
 import { FormatSection } from "./sections/FormatSection"
 import { ImagerySection } from "./sections/ImagerySection"
 import { PreviewFrameSection } from "./sections/PreviewFrameSection"
-import { SplitInspectorSection } from "./sections/SplitInspectorSection"
 
 /**
  * The whole left-hand control panel.
@@ -44,17 +43,6 @@ export const ControlPanel = memo(function ControlPanel({
         />
 
         <FormatSection mode={mode} onModeChange={actions.setMode} />
-
-        {mode === "split" && (
-          <SplitInspectorSection
-            sections={state.sections}
-            activeSection={state.activeSection}
-            sectionRadius={appearance.sectionRadius}
-            onSelectSection={actions.selectSection}
-            onResizeSection={actions.resizeSection}
-            onAppearanceChange={actions.updateAppearance}
-          />
-        )}
 
         <PreviewFrameSection
           frame={frame}
